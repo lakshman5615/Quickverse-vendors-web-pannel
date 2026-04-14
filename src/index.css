@@ -13,3 +13,17 @@ body {
 	background-color: #09090b;
 	color: #f4f4f5;
 }
+
+@keyframes custom-ring {
+  0% { transform: rotate(0); }
+  2% { transform: rotate(1deg) translateY(-1px); }
+  4% { transform: rotate(-1deg) translateY(1px); }
+  6% { transform: rotate(1deg) translateY(-1px); }
+  8% { transform: rotate(-1deg) translateY(1px); }
+  10% { transform: rotate(0); }
+  100% { transform: rotate(0); } /* Pauses briefly before ringing again */
+}
+
+.animate-ring {
+  animation: custom-ring 2.5s infinite ease-in-out;
+}
