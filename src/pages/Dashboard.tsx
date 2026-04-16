@@ -1,8 +1,8 @@
 import IncomingOrderModal from '../components/modals/IncomingOrderModal';
 import { useOrderCall } from '../hooks/useOrderCall';
-import { dummyOrders } from '../data/mockOrders';
 import type { Order } from '../types/order';
 import {Inbox} from 'lucide-react';
+const SMARTBIZ_BASE_URL = "https://your-smartbiz-url.com"
 const Dashboard= () => {
 
   const{activeOrder , triggerIncomingOrder , clearOrder} = useOrderCall();
@@ -11,10 +11,8 @@ const Dashboard= () => {
     
     clearOrder(); 
     
-    window.open(`https://your-smartbiz-url.com/orders/${order.id}`, '_blank');
+    window.open(`${SMARTBIZ_BASE_URL}/orders/${order.id}`, '_blank');
   };
-
-
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5 min-h-full">
@@ -35,16 +33,8 @@ const Dashboard= () => {
         </div>
       )}
       
-       {/* Button to simulate an incoming order for testing */}
-      <div className="mt-10">
-        <button 
-          onClick={() => triggerIncomingOrder(dummyOrders[0])}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition-colors"
-        >
-          Simulate Incoming Order
-        </button>
-      </div>
-       {/* Put this modal component at the bottom of your root div */}
+       
+  
       {activeOrder && (
         <IncomingOrderModal 
           order={activeOrder} 

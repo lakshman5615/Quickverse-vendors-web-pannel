@@ -4,5 +4,5 @@ export interface Order {
     description:string;
     amount:number;
     quantity:number;
-    status:'PENDING'|'ACCEPTED'|'REJECTED'
+    shopId:string;
 }

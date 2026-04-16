@@ -7,7 +7,7 @@ export const dummyOrders:Order[] =[
     description:"2x Burger , 1x Large Fries,2x coke",
     amount:450 ,
     quantity: 3,
-    status:"PENDING"
+    shopId:"SHOP-001"
 
     },
      {
@@ -16,7 +16,7 @@ export const dummyOrders:Order[] =[
     description:"Extra olives, no onions, extra side dip",
     amount:850 ,
     quantity: 1,
-    status:"PENDING"
+    shopId:"SHOP-002"
 
     },
      {
@@ -25,7 +25,7 @@ export const dummyOrders:Order[] =[
     description:"2x Burger , 1x Large Fries,2x coke",
     amount:750 ,
     quantity: 3,
-    status:"PENDING"
+    shopId:"SHOP-003"
 
     }
 

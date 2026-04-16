@@ -1,0 +1,163 @@
+import { useEffect, useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import OtpModal from "../components/Otpmodal";
+import { CustomButton, TextInput } from "../components/common";
+import {
+  useLoginMutation, 
+  useRequestOtpMutation,
+} from "../apis/authentication"; 
+import { useAuthStore } from "../stores/useAuthStore";
+
+const MOBILE_LENGTH = 10;
+const INDIAN_MOBILE_REGEX = /^[6-9]\d{9}$/;
+
+const Authentication = () => {
+  const navigate = useNavigate();
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
+  const [verificationId, setVerificationId] = useState("");
+  const { isAuthenticated, saveSession } = useAuthStore();
+
+  const [requestOtp, { isLoading: isRequestingOtp }] = useRequestOtpMutation();
+  const [login, { isLoading: isLoggingIn }] = useLoginMutation();
+  
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/vendor/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  const formik = useFormik({
+    initialValues: {
+      mobileNumber: "",
+    },
+    validationSchema: Yup.object({
+      mobileNumber: Yup.string()
+        .required("Mobile number is required")
+        .matches(
+          INDIAN_MOBILE_REGEX,
+          "Enter a valid 10-digit Indian mobile number",
+        ),
+    }),
+    onSubmit: async (values) => {
+      try {
+        const response = await requestOtp(values.mobileNumber).unwrap();
+
+        console.log("OTP Response:", response);
+
+        setVerificationId(response.response?.verificationId ?? "");
+       
+        setOtpDigits(["", "", "", ""]);
+        setShowOtpModal(true);
+        toast.success("OTP sent via SMS");
+      } catch (error: any) {
+        toast.error(error?.data?.error?.message);
+      }
+    },
+  });
+
+  const handleChangeOtpDigit = (index: number, value: string) => {
+    setOtpDigits((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  };
+
+  const handleVerifyOtp = async () => {
+    try {
+      if (!verificationId) {
+        toast.error("Please request OTP again");
+        return;
+      }
+
+      const otp = otpDigits.join("");
+
+      const response = await login({
+        phone: formik.values.mobileNumber,
+        otp,
+        verificationId,
+      }).unwrap();
+
+      console.log("Otp Verification Response : ", response);
+
+      saveSession(response.jwt, response.shopId, response.phone); // need to confirm in backend shopID 
+      
+      setShowOtpModal(false);
+      toast.success("Login successful");
+      navigate("/vendor/dashboard", { replace: true });
+    } catch (error: any) {
+      toast.error(error?.data?.error?.message);
+    }
+  };
+
+  const handleResendOtp = () => {
+    void formik.submitForm();
+  };
+
+  return (
+    <main className="min-h-screen bg-zinc-950 px-4 py-6">
+      
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-3xl items-center justify-center">
+        <section className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm shadow-black/30">
+          <h1 className="mb-6 text-center text-3xl font-semibold text-zinc-100">
+            QuickVerse
+          </h1>
+
+          <form onSubmit={formik.handleSubmit} className="space-y-3">
+            <TextInput
+              id="mobileNumber"
+              label="Mobile Number"
+              name="mobileNumber"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
+              placeholder="Enter 10-digit mobile number"
+              value={formik.values.mobileNumber}
+              onBlur={formik.handleBlur}
+              onChange={(event) => {
+                const nextValue = event.target.value
+                  .replace(/\D/g, "")
+                  .slice(0, MOBILE_LENGTH);
+                void formik.setFieldValue("mobileNumber", nextValue);
+              }}
+              error={
+                formik.touched.mobileNumber && formik.errors.mobileNumber
+                  ? formik.errors.mobileNumber
+                  : ""
+              }
+            />
+
+            <CustomButton type="submit" disabled={isRequestingOtp} fullWidth>
+              {isRequestingOtp ? "Sending..." : "Send Otp"}
+            </CustomButton>
+          </form>
+
+          <p className="mt-3 text-sm text-zinc-400">
+            We will send otp though sms
+          </p>
+        </section>
+        
+      </div>
+      
+
+      {showOtpModal ? (
+        <OtpModal
+          mobileNumber={formik.values.mobileNumber}
+          otpDigits={otpDigits}
+          onClose={() => setShowOtpModal(false)}
+          onChangeDigit={handleChangeOtpDigit}
+          onSubmit={handleVerifyOtp}
+          onResendOtp={handleResendOtp}
+          isSubmitting={isLoggingIn}
+        />
+      ) : null}
+    </main>
+  );
+};
+
+export default Authentication;
