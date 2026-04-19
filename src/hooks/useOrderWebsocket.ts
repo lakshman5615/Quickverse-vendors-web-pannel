@@ -3,7 +3,7 @@ import type { Order } from "../types/order";
 import { useAuthStore } from "../stores/useAuthStore";
 
 // TODO TONIGHT: Replace with actual WebSocket URL from backend
-const WS_BASE_URL = "wss://your-backend-url.com/ws/orders";
+const WS_BASE_URL = "https://b8d8-2401-4900-51e9-9ca6-95fa-5c37-2aea-d3ca.ngrok-free.app/ws";
 
 // ── Reconnection Config ─────────────────────────────────
 const MAX_RECONNECT_ATTEMPTS = 10;
