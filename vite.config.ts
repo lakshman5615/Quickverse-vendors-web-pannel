@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/ws": {
-        target: "https://b8d8-2401-4900-51e9-9ca6-95fa-5c37-2aea-d3ca.ngrok-free.app",
+        target: "https://e0b1-2409-4081-8786-c108-8db4-cd35-de04-c31.ngrok-free.app",
         changeOrigin: true,
         secure: false,
         ws: true,

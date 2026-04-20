@@ -4,7 +4,7 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query";
 const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://b8d8-2401-4900-51e9-9ca6-95fa-5c37-2aea-d3ca.ngrok-free.app/quickVerse", // change base url for all api endpoints of vendor
+    baseUrl: "https://e0b1-2409-4081-8786-c108-8db4-cd35-de04-c31.ngrok-free.app/quickVerse", // change base url for all api endpoints of vendor
     prepareHeaders: (headers) => {
       headers.set(
         "Authorization",
