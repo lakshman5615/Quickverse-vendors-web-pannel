@@ -6,14 +6,13 @@ import { useOrderCall } from "../hooks/useOrderCall";
 import { useOrderWebSocket } from "../hooks/useOrderWebsocket";
 import type { Order } from "../types/order";
 
-// TODO TONIGHT: Replace with actual SmartBiz URL from backend
 const SMARTBIZ_BASE_URL = "https://your-smartbiz-url.com";
 
 const Layout = () => {
   const { activeOrder, triggerIncomingOrder, clearOrder } = useOrderCall();
 
-  // WebSocket: connects on mount, auto-reconnects on drop, disconnects on logout
-  useOrderWebSocket(triggerIncomingOrder);
+  // ✅ correct usage
+ const isConnected =  useOrderWebSocket(triggerIncomingOrder);
 
   const handleViewOrder = (order: Order) => {
     clearOrder();
@@ -26,7 +25,7 @@ const Layout = () => {
         <Sidebar />
 
         <section className="h-full w-[85%] rounded-xl border border-zinc-800 bg-zinc-900">
-          <Navbar />
+          <Navbar isConnected ={isConnected}/>
 
           <div className="h-[90%] overflow-y-auto p-5">
             <Outlet />
@@ -34,11 +33,10 @@ const Layout = () => {
         </section>
       </div>
 
-      {/* Order notification modal - lives at Layout level so it persists across all pages */}
       {activeOrder && (
         <IncomingOrderModal
           order={activeOrder}
-          onViewORder={handleViewOrder}
+          onViewOrder ={handleViewOrder} 
         />
       )}
     </main>

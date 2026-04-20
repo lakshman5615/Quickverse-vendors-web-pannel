@@ -4,11 +4,11 @@ import type { Order } from "../../types/order";
 
 interface IncomingOrderModalProps {
     order: Order;
-    onViewORder: (order: Order) => void;
+    onViewOrder: (order: Order) => void;
 
 }
 
-const IncomingOrderModal = ({ order, onViewORder }:
+const IncomingOrderModal = ({ order, onViewOrder }:
 
     IncomingOrderModalProps) => {
 
@@ -68,7 +68,7 @@ const IncomingOrderModal = ({ order, onViewORder }:
                 </div>
                 <div className="flex pt-2">
                     <button
-                        onClick={() => onViewORder(order)}
+                        onClick={() => onViewOrder(order)}
                         className="w-full rounded-lg bg-green-600 py-3 font-bold text-white transition-transform active:scale-95 hover:bg-green-500 shadow-[0_0_15px_rgba(37,99,235,0.4)]"
                     >
                         View Order
