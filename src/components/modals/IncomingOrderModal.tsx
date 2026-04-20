@@ -35,7 +35,7 @@ const IncomingOrderModal = ({ order, onViewOrder }:
                         </span>
                         New Incoming Order!
                     </h2>
-                    <span className="text-zinc-400 font-mono text-sm">{order.id}</span>
+                    <span className="text-zinc-400 font-mono text-sm">{order.orderId}</span>
                 </div>
                 {/* Warning Message Placeholder */}
                 <div className="h-6 mb-2">
@@ -47,22 +47,22 @@ const IncomingOrderModal = ({ order, onViewOrder }:
                 </div>
                 <div className="space-y-4 mb-8">
                     <div>
-                        <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Order Name</p>
-                        <p className="text-lg font-medium text-white">{order.name}</p>
+                        <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Order Items Name</p>
+                        <p className="text-lg font-medium text-white">{order.orderItems.map((item) => item.name).join(", ")}</p>
                     </div>
 
                     <div>
                         <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Description</p>
-                        <p className="text-sm text-zinc-300">{order.description}</p>
+                        <p className="text-sm text-zinc-300">{order.orderDescription}</p>
                     </div>
                     <div className="flex gap-8 border-t border-zinc-800 pt-4">
                         <div>
                             <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Total Amount</p>
-                            <p className="text-lg font-bold text-emerald-400">₹{order.amount}</p>
+                            <p className="text-lg font-bold text-emerald-400">₹{order.totalOrderAmount}</p>
                         </div>
                         <div>
                             <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Quantity</p>
-                            <p className="text-lg font-bold text-white">{order.quantity} Items</p>
+                            <p className="text-lg font-bold text-white">{order.totalQuantity} Items</p>
                         </div>
                     </div>
                 </div>

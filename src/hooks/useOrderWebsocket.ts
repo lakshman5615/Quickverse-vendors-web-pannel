@@ -13,12 +13,12 @@ const isValidOrder = (data: unknown): data is Order => {
   if (typeof data !== "object" || data === null) return false;
   const obj = data as Record<string, unknown>;
   return (
-    typeof obj.id === "string" &&
-    typeof obj.name === "string" &&
-    typeof obj.description === "string" &&
-    typeof obj.amount === "number" &&
-    typeof obj.quantity === "number" &&
-    typeof obj.shopId === "string"
+    typeof obj.orderId === "string" &&
+    typeof obj.totalOrderAmount === "string" &&
+    typeof obj.totalQuantity === "string" &&
+    typeof obj.orderDescription === "string" &&
+    Array.isArray(obj.orderItems)
+    
   );
 };
 
@@ -26,6 +26,8 @@ const isValidOrder = (data: unknown): data is Order => {
 export const useOrderWebSocket = (
   onNewOrder: (order: Order) => void,
 ) => {
+
+
   const [isConnected, setIsConnected] = useState(false);
   const jwt = useAuthStore((state) => state.jwt);
   const shopId = useAuthStore((state) => state.shopId);
@@ -59,12 +61,15 @@ export const useOrderWebSocket = (
         setIsConnected(true);
         console.log("✅ Connected to STOMP");
 
-        const topic = `/topic/vendor/${shopId}`;
+        const topic = `/topic/vendor/${85743}`;
         console.log("📡 Subscribing:", topic);
 
         client.subscribe(topic, (message) => {
           try {
             const data = JSON.parse(message.body);
+
+            console.log("🔔 Order received:", message); // tesing
+
 
             if (isValidOrder(data)) {
               console.log("🔔 Order received:", data.id);

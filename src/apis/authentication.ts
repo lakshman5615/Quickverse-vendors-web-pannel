@@ -24,7 +24,7 @@ const authenticationApi = api.injectEndpoints({
       }) => ({
         url: "/v1/login", // change vendor login endpoint url
         method: "POST",
-        body: { phone: `91${phone}`, otp, verificationId },
+        body: { phone: `${phone}`, otp, verificationId },
       }),
     }),
 

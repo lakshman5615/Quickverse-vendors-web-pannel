@@ -1,6 +1,7 @@
 import {useState , useEffect , useRef } from 'react';
 import type{ Order} from "../types/order";
-import  Alert_ringtone from "../assets/Alert_ringtone.mp3";
+
+
 
 export const useOrderCall = () =>{
    
@@ -12,7 +13,7 @@ export const useOrderCall = () =>{
 
    useEffect ( ()=>{
 
-    audioRef.current = new Audio(Alert_ringtone);
+    audioRef.current = new Audio("/Alert_ringtone.mp3");
     audioRef.current.loop = true;
    },[]
 );

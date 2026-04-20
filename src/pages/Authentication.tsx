@@ -85,7 +85,7 @@ const Authentication = () => {
 
       console.log("Otp Verification Response : ", response);
 
-      saveSession(response.jwt, response.shopId, response.phone); // need to confirm in backend shopID 
+      saveSession(response.jwt, response.shopId, response.phone); 
       
       setShowOtpModal(false);
       toast.success("Login successful");
