@@ -1,0 +1,144 @@
+import { useMemo, useRef } from "react";
+import type { ClipboardEvent, FormEvent, KeyboardEvent } from "react";
+import { CustomButton } from "./common";
+
+type OtpModalProps = {
+  mobileNumber: string;
+  otpDigits: string[];
+  onClose: () => void;
+  onChangeDigit: (index: number, value: string) => void;
+  onSubmit: () => void;
+  onResendOtp: () => void;
+  isSubmitting?: boolean;
+};
+
+const OtpModal = ({
+  mobileNumber,
+  otpDigits,
+  onClose,
+  onChangeDigit,
+  onSubmit,
+  onResendOtp,
+  isSubmitting = false,
+}: OtpModalProps) => {
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  const isOtpComplete = useMemo(
+    () => otpDigits.every((digit) => digit.trim() !== ""),
+    [otpDigits],
+  );
+
+  const handleDigitChange = (index: number, value: string) => {
+    const sanitized = value.replace(/\D/g, "").slice(-1);
+    onChangeDigit(index, sanitized);
+
+    if (sanitized && index < otpDigits.length - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleBackspace = (
+    index: number,
+    event: KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (event.key === "Backspace" && !otpDigits[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (event: ClipboardEvent<HTMLDivElement>) => {
+    const pasted = event.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 4);
+
+    if (!pasted) {
+      return;
+    }
+
+    event.preventDefault();
+
+    pasted.split("").forEach((digit, index) => {
+      onChangeDigit(index, digit);
+    });
+
+    const focusIndex = Math.min(pasted.length, 3);
+    inputRefs.current[focusIndex]?.focus();
+  };
+
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    if (isOtpComplete) {
+      onSubmit();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
+      <div className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm shadow-black/30">
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-100">Verify OTP</h2>
+            <p className="mt-1 text-sm text-zinc-400">
+              Enter the 4-digit code sent to +91 {mobileNumber}
+            </p>
+          </div>
+          <CustomButton
+            type="button"
+            variant="secondary"
+            className="px-2 py-1 text-sm"
+            onClick={onClose}
+          >
+            Close
+          </CustomButton>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="flex justify-between gap-2" onPaste={handlePaste}>
+            {otpDigits.map((digit, index) => (
+              <input
+                key={index}
+                ref={(element) => {
+                  inputRefs.current[index] = element;
+                }}
+                type="text"
+                inputMode="numeric"
+                autoComplete={index === 0 ? "one-time-code" : "off"}
+                maxLength={1}
+                value={digit}
+                onChange={(event) =>
+                  handleDigitChange(index, event.target.value)
+                }
+                onKeyDown={(event) => handleBackspace(index, event)}
+                className="h-14 w-14 rounded-md border border-zinc-700 bg-zinc-950 text-center text-xl font-medium text-zinc-100 outline-none focus:border-zinc-400"
+                aria-label={`OTP digit ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <CustomButton
+            type="submit"
+            disabled={!isOtpComplete || isSubmitting}
+            fullWidth
+            className="mt-5"
+          >
+            {isSubmitting ? "Verifying..." : "Verify Otp"}
+          </CustomButton>
+        </form>
+
+        <CustomButton
+          type="button"
+          onClick={onResendOtp}
+          disabled={isSubmitting}
+          variant="secondary"
+          fullWidth
+          className="mt-2"
+        >
+          Resend OTP
+        </CustomButton>
+      </div>
+    </div>
+  );
+};
+
+export default OtpModal;

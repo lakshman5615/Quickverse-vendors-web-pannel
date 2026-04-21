@@ -1,0 +1,15 @@
+export interface Order {
+  orderId: string;           
+  totalOrderAmount: string;  
+  totalQuantity: string;     
+  orderDescription: string;  
+  orderItems: OrderItem[];   
+  status: string;            
+  id: string;                
+  createdAt: string;         
+}
+export interface OrderItem {
+  id: number;
+  name: string;
+  itemCount: number;
+}
