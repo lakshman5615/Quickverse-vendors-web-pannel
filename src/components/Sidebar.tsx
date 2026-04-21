@@ -9,7 +9,7 @@ const Sidebar = () => {
   return (
     <aside className="h-full w-[15%] rounded-xl border border-zinc-800 bg-zinc-900 p-4">
       <h1 className="mb-6 text-2xl font-semibold text-zinc-100">
-        QuickVerse
+        QuickVerse-🚀
       </h1>
 
       <nav className="space-y-2">

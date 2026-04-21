@@ -26,7 +26,7 @@ const isValidOrder = (data: unknown): data is Order => {
 export const useOrderWebSocket = (
   onNewOrder: (order: Order) => void,
 ) => {
-
+ (window as any).triggerTestOrder = onNewOrder; // testing only 
 
   const [isConnected, setIsConnected] = useState(false);
   const jwt = useAuthStore((state) => state.jwt);
@@ -54,7 +54,7 @@ export const useOrderWebSocket = (
       reconnectDelay: 5000,
 
       connectHeaders: {
-        Authorization: `Bearer ${jwt}`, // 🔥 IMPORTANT
+        Authorization: `Bearer ${jwt}`,
       },
 
       onConnect: () => {

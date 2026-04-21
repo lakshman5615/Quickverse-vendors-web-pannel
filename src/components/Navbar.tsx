@@ -11,7 +11,7 @@ const Navbar = ({ isConnected }: { isConnected: boolean }) => {
   return (
     <header className="flex h-[5%] min-h-16 items-center justify-between border-b border-zinc-800 px-5">
       <p className="text-sm text-zinc-400">
-        Vendor Dashboard
+        Vendor Dashboard-👨‍🍳
       </p>
       
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800">

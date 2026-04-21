@@ -13,9 +13,9 @@ const Dashboard = () => {
         <div className="rounded-full bg-zinc-800/50 p-6 mb-4">
           <Inbox className="w-12 h-12 text-zinc-600" strokeWidth={1.5} />
         </div>
-        <h3 className="text-lg font-semibold text-zinc-300">No new orders</h3>
+        <h3 className="text-lg font-semibold text-zinc-300">No new orders😐</h3>
         <p className="text-sm mt-1 text-zinc-500">
-          You're all caught up! Waiting for the next order...
+          You're all caught up! Waiting for the next order 😊...
         </p>
       </div>
     </div>
