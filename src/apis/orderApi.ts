@@ -1,25 +1,33 @@
-import api from "./index"; 
-import { mockAllOrders } from "../data/mockStats"; 
+// import api from "./index";
+// import type { Order } from "../types/order";
+
+// const orderApi = api.injectEndpoints({
+//   endpoints: (build) => ({
+//     getVendorOrders: build.query<Order[], string>({
+//       query: (shopId) => ({
+//         url: `/v1/orders/shop/${shopId}`,
+//         method: "GET",
+//       }),
+//     }),
+//   }),
+// });
+
+// export const { useGetVendorOrdersQuery } = orderApi;
+
+
+import api from "./index";
 import type { Order } from "../types/order";
+import { mockOrderHistory } from "../data/mockOrderHistory";
 
-export const orderApi = api.injectEndpoints({
-  endpoints: (builder) => ({
-    
-    getAllOrders: builder.query<Order[], string>({
-      // ✅ Use queryFn to skip the network call and return Mock Data directly
-      async queryFn() {
-        return { data: mockAllOrders };
+const orderApi = api.injectEndpoints({
+  endpoints: (build) => ({
+    getVendorOrders: build.query<Order[], string>({
+      
+      queryFn: async () => {
+        return { data: mockOrderHistory };
       },
-
-      /* ⚠️ FUTURE INTEGRATION: 
-         When your backend is ready, delete 'queryFn' above 
-         and uncomment these lines: 
-      query: (shopId) => `/orders/all?shopId=${shopId}`,
-      transformResponse: (response: Order[]) => response,
-      */
     }),
   }),
-  overrideExisting: false,
 });
 
-export const { useGetAllOrdersQuery } = orderApi;
+export const { useGetVendorOrdersQuery } = orderApi;

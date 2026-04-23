@@ -6,7 +6,10 @@ export interface Order {
   orderItems: OrderItem[];   
   status: string;            
   id: string;                
-  createdAt: string;         
+  createdAt: string; 
+  customerName: string;
+  deliveryPartnerName: string;
+  paymentStatus: string;        
 }
 export interface OrderItem {
   id: number;

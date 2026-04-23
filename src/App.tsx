@@ -5,6 +5,8 @@ import Authentication from './pages/Authentication';
 import Layout from './Layout/Dashboardlayout'; 
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import OrderHistory from './pages/OrderHistory';
+
 
 const App = () => {
   (window as any).toast = toast;
@@ -20,6 +22,8 @@ const App = () => {
         
         <Route path="/vendor" element={<Layout />}>
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="order-history" element={<OrderHistory />} />
+
         </Route>
         </Route>
         
