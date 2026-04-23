@@ -8,13 +8,13 @@ interface OrderState {
   removeOrder: (orderId: string) => void;
   markAsViewed: (orderId: string) => void;
   clearAll: () => void;
- 
+
 }
 
 export const useOrderStore = create<OrderState>((set) => ({
   incomingOrders: [],
   viewedOrderIds: new Set(),
-  
+
   addOrder: (order) => set((state) => {
     // Avoid duplicates
     if (state.incomingOrders.some(o => o.orderId === order.orderId)) return state;

@@ -2,13 +2,13 @@ import type { Order } from "../../types/order";
 import { useOrderStore } from "../../stores/useOrderStore";
 
 export const IncomingOrderCard = ({ order }: { order: Order }) => {
-    const Smartbiz_Url = "https://smartbiz.in";
+    const Smartbiz_Url = "https://smartbiz.amazon.in/";
   const { markAsViewed, viewedOrderIds } = useOrderStore();
   const isViewed = viewedOrderIds.has(order.orderId);
 
   const handleView = () => {
     markAsViewed(order.orderId);
-    window.open(`${Smartbiz_Url}orders/${order.id}`, "_blank");
+    window.open(`${Smartbiz_Url}orders/${order.orderId}`, "_blank");
   };
 
   return (
@@ -35,6 +35,30 @@ export const IncomingOrderCard = ({ order }: { order: Order }) => {
           {order.orderDescription}
         </p>
       </div>
+
+      {/* Customer Details Section */}
+      {(order.customerName || order.customerPhone || order.customerAddress) && (
+        <div className="mb-4 bg-zinc-950/50 rounded-lg p-3 border border-zinc-800/50">
+          <div className="flex flex-col gap-1.5">
+            {order.customerName && (
+              <p className="text-sm text-zinc-200 font-medium flex items-center gap-2">
+                <span className="text-zinc-500">👤</span> {order.customerName}
+              </p>
+            )}
+            {order.customerPhone && (
+              <p className="text-xs text-zinc-400 font-mono flex items-center gap-2">
+                <span className="text-zinc-500">📞</span> {order.customerPhone}
+              </p>
+            )}
+            {order.customerAddress && (
+              <p className="text-xs text-zinc-500 line-clamp-2 flex items-start gap-2">
+                <span className="text-zinc-500">📍</span> 
+                <span className="mt-0.5">{order.customerAddress}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Price & Quantity */}
       <div className="flex border-t border-zinc-800 pt-4 mb-5 gap-6">

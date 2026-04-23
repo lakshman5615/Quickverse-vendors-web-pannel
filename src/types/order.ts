@@ -9,7 +9,9 @@ export interface Order {
   createdAt: string; 
   customerName: string;
   deliveryPartnerName: string;
-  paymentStatus: string;        
+  paymentStatus: string;    
+  customerPhone:string;
+  customerAddress:string;    
 }
 export interface OrderItem {
   id: number;

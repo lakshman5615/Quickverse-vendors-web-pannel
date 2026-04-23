@@ -52,6 +52,7 @@ export const useOrderWebSocket = () => {
         client.subscribe(topic, (message) => {
           try {
             const data = JSON.parse(message.body);
+          
             console.log("🔔 WebSocket Message received:", data);
 
            
