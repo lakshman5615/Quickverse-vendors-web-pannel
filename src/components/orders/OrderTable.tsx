@@ -26,6 +26,7 @@ interface OrderTableProps {
   pageSize: number;
   totalOrders: number;
   onPageChange: (page: number) => void;
+  onOrderClick: (order: Order) => void;
 }
 
 // ─── Helper: format timestamp ───────────────────────────────────
@@ -53,6 +54,7 @@ const OrderTable = ({
   pageSize,
   totalOrders,
   onPageChange,
+   onOrderClick,
 }: OrderTableProps) => {
   const totalPages = Math.ceil(totalOrders / pageSize);
 
@@ -99,6 +101,7 @@ const OrderTable = ({
             {orders.map((order, idx) => (
               <tr
                 key={order.id || order.orderId}
+                onClick={() => onOrderClick(order)}
                 className={`border-b border-zinc-800/60 transition-colors hover:bg-zinc-800/30 ${idx % 2 === 0 ? "bg-zinc-900/50" : "bg-zinc-900/20"
                   }`}
               >

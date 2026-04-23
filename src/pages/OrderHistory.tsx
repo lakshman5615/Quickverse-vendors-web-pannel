@@ -4,6 +4,10 @@ import { useGetVendorOrdersQuery } from "../apis/orderApi";
 import FilterBar from "../components/orders/FilterBar";
 import OrderTable from "../components/orders/OrderTable";
 import { RefreshCw, AlertCircle } from "lucide-react";
+import OrderDetailModal from "../components/orders/OrderDetailModal";
+import type { Order } from "../types/order";
+
+
 
 const PAGE_SIZE = 100;
 
@@ -22,6 +26,7 @@ const OrderHistory = () => {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // ─── Pagination state ────────────────────────────────────────
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,7 +42,7 @@ const OrderHistory = () => {
       setCustomEndDate(null);
     }
     setCurrentPage(1);
-};
+  };
 
 
   // ─── Handler: time change ────────────────────────────────────
@@ -200,8 +205,16 @@ const OrderHistory = () => {
           pageSize={PAGE_SIZE}
           totalOrders={filteredOrders.length}
           onPageChange={setCurrentPage}
+          onOrderClick={setSelectedOrder}
         />
       )}
+      {selectedOrder && (
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
+
     </div>
   );
 };
