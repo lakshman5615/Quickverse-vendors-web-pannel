@@ -9,8 +9,9 @@ const Layout = () => {
   // 1. Initialize WebSocket (No arguments needed now)
   const isConnected = useOrderWebSocket();
   
-  // 2. Get incoming orders from the store to manage sound
+  // 2. Get incoming orders and viewed status from the store to manage sound
   const incomingOrders = useOrderStore((state) => state.incomingOrders);
+  const viewedOrderIds = useOrderStore((state) => state.viewedOrderIds);
   
   // 3. Audio Setup
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -22,14 +23,17 @@ const Layout = () => {
   }, []);
 
   useEffect(() => {
-    // 🔊 Play sound if there are orders, stop if none
-    if (incomingOrders.length > 0 && audioRef.current) {
+    // Check if there is at least one order that hasn't been viewed yet
+    const hasUnviewedOrders = incomingOrders.some(order => !viewedOrderIds.has(order.orderId));
+
+    //  Play sound if there are UNVIEWED orders, stop if all are viewed (or list is empty)
+    if (hasUnviewedOrders && audioRef.current) {
       audioRef.current.play().catch(e => console.log("Audio blocked by browser:", e));
-    } else if (incomingOrders.length === 0 && audioRef.current) {
+    } else if (!hasUnviewedOrders && audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-  }, [incomingOrders.length]);
+  }, [incomingOrders, viewedOrderIds]);
 
   return (
     <main className="h-screen bg-zinc-950 p-4">
