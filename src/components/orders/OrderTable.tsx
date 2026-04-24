@@ -5,19 +5,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 const STATUS_STYLES: Record<string, string> = {
   ACCEPTED: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
   REJECTED: "bg-rose-500/15 text-rose-400 border-rose-500/30",
-  ASSIGNING: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  ASSIGNED: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  DELIVERED: "bg-violet-500/15 text-violet-400 border-violet-500/30",
+
 };
-
-// ─── Payment status badge colors ────────────────────────────────
-const PAYMENT_STYLES: Record<string, string> = {
-  PAID: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  PENDING: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  FAILED: "bg-rose-500/15 text-rose-400 border-rose-500/30",
-};
-
-
 
 // ─── Props ──────────────────────────────────────────────────────
 interface OrderTableProps {
@@ -92,8 +81,6 @@ const OrderTable = ({
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Customer Name</th>
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Items</th>
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Status</th>
-              <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Delivery Partner</th>
-              <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Payment Status</th>
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Amount</th>
             </tr>
           </thead>
@@ -121,12 +108,7 @@ const OrderTable = ({
                 <td className="px-4 py-3">
                   {renderBadge(order.status, STATUS_STYLES)}
                 </td>
-                <td className="px-4 py-3 text-xs text-zinc-300">
-                  {order.deliveryPartnerName || "—"}
-                </td>
-                <td className="px-4 py-3">
-                  {renderBadge(order.paymentStatus, PAYMENT_STYLES)}
-                </td>
+              
                 <td className="px-4 py-3 text-xs font-semibold text-emerald-400 text-right">
                   ₹{order.totalOrderAmount}
                 </td>

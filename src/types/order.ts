@@ -7,9 +7,7 @@ export interface Order {
   status: string;            
   id: string;                
   createdAt: string; 
-  customerName: string;
-  deliveryPartnerName: string;
-  paymentStatus: string;    
+  customerName: string;   
   customerPhone:string;
   customerAddress:string;    
 }

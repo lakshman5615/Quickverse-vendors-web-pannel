@@ -1,42 +1,30 @@
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { OrderStatusFilter, TimeFilterOption } from "../../types/filters";
 
 // ─── Constants ──────────────────────────────────────────────────
 const STATUS_OPTIONS = [
-  { label: "All", value: "ALL" },
-  { label: "Accepted", value: "ACCEPTED" },
-  { label: "Rejected", value: "REJECTED" },
-  { label: "Assigning", value: "ASSIGNING" },
-  { label: "Assigned", value: "ASSIGNED" },
-  { label: "Delivered", value: "DELIVERED" },
+  { label: "All", value: OrderStatusFilter.ALL },
+  { label: "Accepted", value: OrderStatusFilter.ACCEPTED },
+  { label: "Rejected", value: OrderStatusFilter.REJECTED },
 ];
 
 const TIME_OPTIONS = [
-  { label: "Last 30 min", value: "LAST_30_MIN" },
-  { label: "Today", value: "TODAY" },
-  { label: "Last Week", value: "LAST_WEEK" },
-];
-
-const currentYear = new Date().getFullYear();
-const YEAR_LIST = Array.from({ length: 6 }, (_, i) => currentYear - i);
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  { label: "Last 30 min", value: TimeFilterOption.LAST_30_MIN },
+  { label: "Today", value: TimeFilterOption.TODAY },
+  { label: "Last Week", value: TimeFilterOption.LAST_WEEK },
+  { label: "Monthly", value: TimeFilterOption.THIS_MONTH },
+  { label: "Yearly", value: TimeFilterOption.THIS_YEAR },
 ];
 
 // ─── Props ──────────────────────────────────────────────────────
 interface FilterBarProps {
   statusFilter: string;
   timeFilter: string;
-  selectedMonth: number | null;
-  selectedYear: number | null;
   customStartDate: Date | null;
   customEndDate: Date | null;
   onStatusChange: (status: string) => void;
   onTimeChange: (time: string) => void;
-  onMonthChange: (month: number) => void;
-  onYearChange: (year: number) => void;
   onCustomDateChange: (start: Date | null, end: Date | null) => void;
 }
 
@@ -44,14 +32,10 @@ interface FilterBarProps {
 const FilterBar = ({
   statusFilter,
   timeFilter,
-  selectedMonth,
-  selectedYear,
   customStartDate,
   customEndDate,
   onStatusChange,
   onTimeChange,
-  onMonthChange,
-  onYearChange,
   onCustomDateChange,
 }: FilterBarProps) => {
 
@@ -100,41 +84,7 @@ const FilterBar = ({
           </button>
         ))}
 
-        {/* Monthly dropdown */}
-        <select
-          value={timeFilter === "MONTHLY" && selectedMonth !== null ? selectedMonth : ""}
-          onChange={(e) => {
-            onMonthChange(Number(e.target.value));
-          }}
-          className={dropdownClass}
-        >
-          <option value="" disabled>
-            Monthly
-          </option>
-          {MONTH_NAMES.map((name, idx) => (
-            <option key={name} value={idx}>
-              {name}
-            </option>
-          ))}
-        </select>
 
-        {/* Yearly dropdown */}
-        <select
-          value={timeFilter === "YEARLY" && selectedYear !== null ? selectedYear : ""}
-          onChange={(e) => {
-            onYearChange(Number(e.target.value));
-          }}
-          className={dropdownClass}
-        >
-          <option value="" disabled>
-            Yearly
-          </option>
-          {YEAR_LIST.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
 
         {/* Custom date range button + pickers */}
         <button

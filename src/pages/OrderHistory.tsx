@@ -6,6 +6,7 @@ import OrderTable from "../components/orders/OrderTable";
 import { RefreshCw, AlertCircle } from "lucide-react";
 import OrderDetailModal from "../components/orders/OrderDetailModal";
 import type { Order } from "../types/order";
+import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
 
 
 
@@ -15,61 +16,49 @@ const OrderHistory = () => {
   // ─── Auth ─────────────────────────────────────────────────────
   const shopId = useAuthStore((s) => s.shopId);
 
-  // ─── RTK Query: fetch all orders ─────────────────────────────
-  const { data: orders = [], isLoading, isError, refetch, isFetching } =
-    useGetVendorOrdersQuery(shopId ?? "", { skip: !shopId });
-
   // ─── Filter state ────────────────────────────────────────────
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [timeFilter, setTimeFilter] = useState("ALL");
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState<OrderStatusFilter | undefined>(undefined);
+  const [timeFilter, setTimeFilter] = useState<TimeFilterOption | undefined>(undefined);
   const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // ─── RTK Query: fetch filtered orders ────────────────────────
+  const { data: orders = [], isLoading, isError, refetch, isFetching } =
+    useGetVendorOrdersQuery(
+      {
+        shopId: shopId ?? "",
+        status: statusFilter,
+        timeFilter: timeFilter,
+        startDate: customStartDate?.toISOString() || undefined,
+        endDate: customEndDate?.toISOString() || undefined,
+      },
+      { skip: !shopId }
+    );
 
   // ─── Pagination state ────────────────────────────────────────
   const [currentPage, setCurrentPage] = useState(1);
 
   // ─── Handler: status change ──────────────────────────────────
   const handleStatusChange = (status: string) => {
-    setStatusFilter(status);
     if (status === "ALL") {
-      setTimeFilter("ALL");
-      setSelectedMonth(null);
-      setSelectedYear(null);
+      setStatusFilter(undefined);
+      setTimeFilter(undefined);
       setCustomStartDate(null);
       setCustomEndDate(null);
+    } else {
+      setStatusFilter(status as OrderStatusFilter);
     }
     setCurrentPage(1);
   };
 
-
   // ─── Handler: time change ────────────────────────────────────
   const handleTimeChange = (time: string) => {
-    setTimeFilter(time);
-    setSelectedMonth(null);
-    setSelectedYear(null);
-    setCustomStartDate(null);
-    setCustomEndDate(null);
-    setCurrentPage(1);
-  };
-
-  // ─── Handler: month dropdown ─────────────────────────────────
-  const handleMonthChange = (month: number) => {
-    setTimeFilter("MONTHLY");
-    setSelectedMonth(month);
-    setSelectedYear(null);
-    setCustomStartDate(null);
-    setCustomEndDate(null);
-    setCurrentPage(1);
-  };
-
-  // ─── Handler: year dropdown ──────────────────────────────────
-  const handleYearChange = (year: number) => {
-    setTimeFilter("YEARLY");
-    setSelectedYear(year);
-    setSelectedMonth(null);
+    if (time === "ALL") {
+      setTimeFilter(undefined);
+    } else {
+      setTimeFilter(time as TimeFilterOption);
+    }
     setCustomStartDate(null);
     setCustomEndDate(null);
     setCurrentPage(1);
@@ -82,58 +71,11 @@ const OrderHistory = () => {
     setCurrentPage(1);
   };
 
-  // ─── Compute: filtered orders ────────────────────────────────
-  const filteredOrders = useMemo(() => {
-    let result = [...orders];
-
-    // 1) Status filter
-    if (statusFilter !== "ALL") {
-      result = result.filter((o) => o.status === statusFilter);
-    }
-
-    // 2) Time filter
-    const now = new Date();
-
-    if (timeFilter === "LAST_30_MIN") {
-      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
-      result = result.filter((o) => new Date(o.createdAt) >= thirtyMinAgo);
-    } else if (timeFilter === "TODAY") {
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      result = result.filter((o) => new Date(o.createdAt) >= startOfDay);
-    } else if (timeFilter === "LAST_WEEK") {
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      result = result.filter((o) => new Date(o.createdAt) >= weekAgo);
-    } else if (timeFilter === "MONTHLY" && selectedMonth !== null) {
-      const year = now.getFullYear();
-      result = result.filter((o) => {
-        const d = new Date(o.createdAt);
-        return d.getMonth() === selectedMonth && d.getFullYear() === year;
-      });
-    } else if (timeFilter === "YEARLY" && selectedYear !== null) {
-      result = result.filter((o) => {
-        const d = new Date(o.createdAt);
-        return d.getFullYear() === selectedYear;
-      });
-    } else if (timeFilter === "CUSTOM") {
-      if (customStartDate) {
-        result = result.filter((o) => new Date(o.createdAt) >= customStartDate);
-      }
-      if (customEndDate) {
-        // Include the entire end date day
-        const endOfDay = new Date(customEndDate);
-        endOfDay.setHours(23, 59, 59, 999);
-        result = result.filter((o) => new Date(o.createdAt) <= endOfDay);
-      }
-    }
-
-    return result;
-  }, [orders, statusFilter, timeFilter, selectedMonth, selectedYear, customStartDate, customEndDate]);
-
   // ─── Compute: paginated orders ───────────────────────────────
   const paginatedOrders = useMemo(() => {
     const startIdx = (currentPage - 1) * PAGE_SIZE;
-    return filteredOrders.slice(startIdx, startIdx + PAGE_SIZE);
-  }, [filteredOrders, currentPage]);
+    return orders.slice(startIdx, startIdx + PAGE_SIZE);
+  }, [orders, currentPage]);
 
   // ─── Render ──────────────────────────────────────────────────
   return (
@@ -143,7 +85,7 @@ const OrderHistory = () => {
         <div>
           <h2 className="text-xl font-semibold text-zinc-100">Order History</h2>
           <p className="text-sm text-zinc-500 mt-0.5">
-            {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""} found
+            {orders.length} order{orders.length !== 1 ? "s" : ""} found
           </p>
         </div>
         <button
@@ -159,16 +101,12 @@ const OrderHistory = () => {
       {/* Filters */}
       <div className="mb-5">
         <FilterBar
-          statusFilter={statusFilter}
-          timeFilter={timeFilter}
-          selectedMonth={selectedMonth}
-          selectedYear={selectedYear}
+          statusFilter={statusFilter || "ALL"}
+          timeFilter={timeFilter || "ALL"}
           customStartDate={customStartDate}
           customEndDate={customEndDate}
           onStatusChange={handleStatusChange}
           onTimeChange={handleTimeChange}
-          onMonthChange={handleMonthChange}
-          onYearChange={handleYearChange}
           onCustomDateChange={handleCustomDateChange}
         />
       </div>
@@ -203,7 +141,7 @@ const OrderHistory = () => {
           orders={paginatedOrders}
           currentPage={currentPage}
           pageSize={PAGE_SIZE}
-          totalOrders={filteredOrders.length}
+          totalOrders={orders.length}
           onPageChange={setCurrentPage}
           onOrderClick={setSelectedOrder}
         />
