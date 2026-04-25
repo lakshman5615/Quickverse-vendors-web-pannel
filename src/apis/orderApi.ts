@@ -36,7 +36,7 @@ const orderApi = api.injectEndpoints({
         });
 
         return {
-          url: `/v1/orders/shop/${shopId}`,
+          url: `/v2/order/${shopId}/orders`,
           method: "GET",
           params: cleanParams,
         };
