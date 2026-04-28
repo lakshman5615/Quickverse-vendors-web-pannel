@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Order, OrderActionEvent } from '../types/order';
+import type { OrderActionEvent } from '../types/order';
 
 interface OrderState {
   incomingOrders: OrderActionEvent[];

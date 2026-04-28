@@ -5,7 +5,7 @@ import FilterBar from "../components/orders/FilterBar";
 import OrderTable from "../components/orders/OrderTable";
 import { RefreshCw, AlertCircle } from "lucide-react";
 import OrderDetailModal from "../components/orders/OrderDetailModal";
-import type { Order, OrderApiResponse } from "../types/order";
+import type { OrderApiResponse } from "../types/order";
 import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
 
 

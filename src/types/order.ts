@@ -1,17 +1,3 @@
-export interface Order {
-  orderId: string;           
-  totalAmount: number;  
-  totalItemCount: number;     
-  orderDescription: string;  
-  orderItem: OrderItem[];   
-  state: string;            
-  creationTime: string; 
-  customerName: string;   
-  customerMobile: number;
-  customerAddress: string;
-  
-}
-
 export interface OrderActionEvent {
   orderId: string;
   totalOrderAmount: string;

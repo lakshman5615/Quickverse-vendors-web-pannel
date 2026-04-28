@@ -1,5 +1,5 @@
 import api from "./index";
-import type { Order, OrderApiResponse } from "../types/order";
+import type { OrderApiResponse } from "../types/order";
 import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
 
 export interface OrderFilterParams {

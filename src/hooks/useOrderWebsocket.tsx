@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import type { Order, OrderActionEvent } from "../types/order";
+import type { OrderActionEvent } from "../types/order";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useOrderStore } from "../stores/useOrderStore"; // ✅ Added
 import {toast} from 'react-hot-toast';
