@@ -1,45 +1,47 @@
 import api from "./index";
-import type { Order } from "../types/order";
+import type { Order, OrderApiResponse } from "../types/order";
 import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
 
 export interface OrderFilterParams {
   shopId: string;
-  status?: OrderStatusFilter;
-  timeFilter?: TimeFilterOption;
-  startDate?: string;
-  endDate?: string;
+  orderStatus?: OrderStatusFilter[]; // Backend expects List<String>
+  timeRange?: TimeFilterOption;
+  fromTime?: string;
+  toTime?: string;
 }
 
 const orderApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getVendorOrders: build.query<Order[], OrderFilterParams>({
+    getVendorOrders: build.query<OrderApiResponse[], OrderFilterParams>({
       query: ({ shopId, ...filters }) => {
-        const cleanParams: Record<string, string> = {};
+        const cleanParams = new URLSearchParams();
 
-        // Validation for CUSTOM time filter
-        if (filters.timeFilter === TimeFilterOption.CUSTOM && (!filters.startDate || !filters.endDate)) {
-          console.warn("Skipping custom time filter: missing startDate or endDate");
-          // Optionally, you can throw an error here depending on backend strictness
-          // delete filters.timeFilter;
-          filters.timeFilter = undefined;
+        // 1. Add orderStatus array (multiple params with same name)
+        if (filters.orderStatus && filters.orderStatus.length > 0) {
+          filters.orderStatus.forEach(status => {
+            cleanParams.append("orderStatus", status);
+          });
         }
 
-        // Dynamically append all valid, defined filters
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined) {
-            if (key === "timeFilter") {
-              cleanParams.time = value; // Keep timeFilter naming consistent with user request, map for API
-            } else {
-              cleanParams[key] = value;
-            }
-          }
-        });
+        // 2. Add timeRange
+        if (filters.timeRange) {
+          cleanParams.append("timeRange", filters.timeRange);
+        }
+
+        // 3. Add fromTime/toTime for CUSTOM range
+        if (filters.timeRange === TimeFilterOption.CUSTOM) {
+          if (filters.fromTime) cleanParams.append("fromTime", filters.fromTime);
+          if (filters.toTime) cleanParams.append("toTime", filters.toTime);
+        }
 
         return {
           url: `/v2/order/${shopId}/orders`,
           method: "GET",
           params: cleanParams,
         };
+      },
+      transformResponse: (response: { orders: { ordersAsList: OrderApiResponse[] } }) => {
+        return response.orders.ordersAsList || [];
       },
     }),
   }),

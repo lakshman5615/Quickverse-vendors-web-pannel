@@ -26,10 +26,10 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Orders" value={stats.total} trend="+12%" />
-        <StatCard title="Total Revenue" value={stats.revenue} trend="+8%" />
-        <StatCard title="Accepted Orders" value={stats.accepted} trend="Active" />
-        <StatCard title="Rejected Orders" value={stats.rejected} trend="-2%" />
+        <StatCard title="Total Orders" value={stats.total} />
+        <StatCard title="Total Revenue" value={stats.revenue} />
+        <StatCard title="Accepted Orders" value={stats.accepted} />
+        <StatCard title="Rejected Orders" value={stats.rejected} />
       </div>
 
       {/* New Incoming Orders Section */}

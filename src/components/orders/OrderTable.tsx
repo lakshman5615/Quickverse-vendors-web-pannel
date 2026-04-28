@@ -1,40 +1,47 @@
-import type { Order } from "../../types/order";
+import type { OrderApiResponse} from "../../types/order";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // ─── Status badge color map ─────────────────────────────────────
 const STATUS_STYLES: Record<string, string> = {
+  PENDING: "bg-amber-500/15 text-amber-400 border-amber-500/30",
   ACCEPTED: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
   REJECTED: "bg-rose-500/15 text-rose-400 border-rose-500/30",
-
+  COMPLETED: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  CANCELLED: "bg-rose-500/15 text-rose-400 border-rose-500/30",
 };
 
 // ─── Props ──────────────────────────────────────────────────────
 interface OrderTableProps {
-  orders: Order[];
+  orders: OrderApiResponse[];
   currentPage: number;
   pageSize: number;
   totalOrders: number;
   onPageChange: (page: number) => void;
-  onOrderClick: (order: Order) => void;
+  onOrderClick: (order: OrderApiResponse) => void;
 }
 
 // ─── Helper: format timestamp ───────────────────────────────────
-const formatDate = (dateStr: string): string => {
+const formatDate = (dateString: string): string => {
   try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  } catch {
-    return dateStr;
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const strTime = pad(hours) + ':' + minutes + ' ' + ampm;
+
+    return `${day}-${month}-${year}, ${strTime}`;
+  } catch (e) {
+    return dateString;
   }
 };
 
+const pad = (n: number) => String(n).padStart(2, '0');
 
 // ─── Component ──────────────────────────────────────────────────
 const OrderTable = ({
@@ -43,7 +50,7 @@ const OrderTable = ({
   pageSize,
   totalOrders,
   onPageChange,
-   onOrderClick,
+  onOrderClick,
 }: OrderTableProps) => {
   const totalPages = Math.ceil(totalOrders / pageSize);
 
@@ -52,7 +59,7 @@ const OrderTable = ({
     return (
       <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
         <p className="text-lg font-semibold text-zinc-400">No orders found😐</p>
-        <p className="text-sm mt-1">Try adjusting your filters</p>
+        <p className="text-sm mt-1">Try adjusting your filters or wait!</p>
       </div>
     );
   }
@@ -81,13 +88,14 @@ const OrderTable = ({
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Customer Name</th>
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Items</th>
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Status</th>
+              <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right"> Payment Method</th>
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Amount</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((order, idx) => (
               <tr
-                key={order.id || order.orderId}
+                key={order.orderId}
                 onClick={() => onOrderClick(order)}
                 className={`border-b border-zinc-800/60 transition-colors hover:bg-zinc-800/30 ${idx % 2 === 0 ? "bg-zinc-900/50" : "bg-zinc-900/20"
                   }`}
@@ -96,21 +104,23 @@ const OrderTable = ({
                   {order.orderId}
                 </td>
                 <td className="px-4 py-3 text-xs text-zinc-400 whitespace-nowrap">
-                  {formatDate(order.createdAt)}
+                  {formatDate(order.creationTime)}
                 </td>
                 <td className="px-4 py-3 text-xs text-zinc-300">
                   {order.customerName || "—"}
                 </td>
                 <td className="px-4 py-3 text-xs text-zinc-300">
-                  {order.orderItems.reduce((sum, item) => sum + item.itemCount, 0)} Items
+                  {order.totalItemCount} Items
                 </td>
 
                 <td className="px-4 py-3">
-                  {renderBadge(order.status, STATUS_STYLES)}
+                  {renderBadge(order.state, STATUS_STYLES)}
                 </td>
-              
+                <td className="px-4 py-3 text-xs text-zinc-300 text-right">
+                  {order.paymentMethod || "—"}
+                </td>
                 <td className="px-4 py-3 text-xs font-semibold text-emerald-400 text-right">
-                  ₹{order.totalOrderAmount}
+                  ₹{order.totalAmount}
                 </td>
               </tr>
             ))}

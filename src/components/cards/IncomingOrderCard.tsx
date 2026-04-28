@@ -1,7 +1,7 @@
-import type { Order } from "../../types/order";
+import type { OrderActionEvent } from "../../types/order";
 import { useOrderStore } from "../../stores/useOrderStore";
 
-export const IncomingOrderCard = ({ order }: { order: Order }) => {
+export const IncomingOrderCard = ({ order }: { order: OrderActionEvent }) => {
     const Smartbiz_Url = "https://smartbiz.amazon.in/";
   const { markAsViewed, viewedOrderIds } = useOrderStore();
   const isViewed = viewedOrderIds.has(order.orderId);

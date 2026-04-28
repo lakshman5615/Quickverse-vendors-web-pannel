@@ -1,36 +1,43 @@
 import { X } from "lucide-react";
-import type { Order } from "../../types/order";
+import type { OrderApiResponse } from "../../types/order";
 
 // ─── Badge styles (reused from OrderTable) ──────────────────────
 const STATUS_STYLES: Record<string, string> = {
+  PENDING: "bg-amber-500/15 text-amber-400 border-amber-500/30",
   ACCEPTED: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
   REJECTED: "bg-rose-500/15 text-rose-400 border-rose-500/30",
-
+  COMPLETED: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  CANCELLED: "bg-rose-500/15 text-rose-400 border-rose-500/30",
 };
-
 
 // ─── Props ──────────────────────────────────────────────────────
 interface OrderDetailModalProps {
-  order: Order;
+  order: OrderApiResponse;
   onClose: () => void;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────
-const formatDate = (dateStr: string): string => {
+const formatDate = (dateString: string): string => {
   try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  } catch {
-    return dateStr;
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const strTime = pad(hours) + ':' + minutes + ' ' + ampm;
+
+    return `${day}-${month}-${year}, ${strTime}`;
+  } catch (e) {
+    return dateString;
   }
 };
+
+const pad = (n: number) => String(n).padStart(2, '0');
 
 const renderBadge = (value: string, styleMap: Record<string, string>) => {
   const style = styleMap[value] || "bg-zinc-700/40 text-zinc-400 border-zinc-600";
@@ -43,7 +50,7 @@ const renderBadge = (value: string, styleMap: Record<string, string>) => {
 
 // ─── Component ──────────────────────────────────────────────────
 const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
-  const totalItems = order.orderItems.reduce((sum, item) => sum + item.itemCount, 0);
+  const totalItems = order.totalItemCount;
 
   return (
     <div
@@ -76,7 +83,15 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-zinc-500">Status</span>
               <span className="text-zinc-600">:</span>
-              {renderBadge(order.status, STATUS_STYLES)}
+              {renderBadge(order.state, STATUS_STYLES)}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-zinc-500">Payment Method</span>
+              <span className="text-zinc-600">:</span>
+              <span className="text-xs font-semibold text-zinc-300 bg-zinc-800 px-2.5 py-1 rounded-lg border border-zinc-700">
+                {order.paymentMethod || "—"}
+              </span>
             </div>
           </div>
           {/* Grid: Key details */}
@@ -88,12 +103,12 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
 
             <div className="rounded-xl bg-zinc-800/50 border border-zinc-800 p-3.5">
               <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-1">Timestamp</p>
-              <p className="text-sm font-medium text-zinc-200">{formatDate(order.createdAt)}</p>
+              <p className="text-sm font-medium text-zinc-200">{formatDate(order.creationTime)}</p>
             </div>
 
             <div className="rounded-xl bg-zinc-800/50 border border-zinc-800 p-3.5">
               <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-1">Amount</p>
-              <p className="text-sm font-bold text-emerald-400">₹{order.totalOrderAmount}</p>
+              <p className="text-sm font-bold text-emerald-400">₹{order.totalAmount}</p>
             </div>
 
             <div className="rounded-xl bg-zinc-800/50 border border-zinc-800 p-3.5">
@@ -111,7 +126,7 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
           <div className="rounded-xl bg-zinc-800/50 border border-zinc-800 p-3.5">
             <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-2">Order Items</p>
             <div className="space-y-2">
-              {order.orderItems.map((item) => (
+              {order.orderItem.map((item) => (
                 <div
                   key={item.id}
                   className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-zinc-700/30 transition"

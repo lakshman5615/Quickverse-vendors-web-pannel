@@ -2,12 +2,12 @@ import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
-import { useOrderWebSocket } from "../hooks/useOrderWebsocket";
+import { useOrderWebsocket } from "../hooks/useOrderWebsocket";
 import { useOrderStore } from "../stores/useOrderStore"; // 
 
 const Layout = () => {
   // 1. Initialize WebSocket (No arguments needed now)
-  const isConnected = useOrderWebSocket();
+  const isConnected = useOrderWebsocket();
   
   // 2. Get incoming orders and viewed status from the store to manage sound
   const incomingOrders = useOrderStore((state) => state.incomingOrders);

@@ -4,7 +4,7 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query";
 const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_API_URL}/quickVerse`,
+    baseUrl: `${import.meta.env.VITE_API_URL}quickVerse`,
     prepareHeaders: (headers) => {
       headers.set(
         "Authorization",

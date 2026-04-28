@@ -1,14 +1,13 @@
 import { create } from 'zustand';
-import type { Order } from '../types/order';
+import type { Order, OrderActionEvent } from '../types/order';
 
 interface OrderState {
-  incomingOrders: Order[];
+  incomingOrders: OrderActionEvent[];
   viewedOrderIds: Set<string>;
-  addOrder: (order: Order) => void;
+  addOrder: (order: OrderActionEvent) => void;
   removeOrder: (orderId: string) => void;
   markAsViewed: (orderId: string) => void;
   clearAll: () => void;
-
 }
 
 export const useOrderStore = create<OrderState>((set) => ({

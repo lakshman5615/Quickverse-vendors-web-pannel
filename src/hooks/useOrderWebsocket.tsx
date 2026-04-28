@@ -1,30 +1,28 @@
 import { useEffect, useState, useRef } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import type { Order } from "../types/order";
+import type { Order, OrderActionEvent } from "../types/order";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useOrderStore } from "../stores/useOrderStore"; // ✅ Added
 import {toast} from 'react-hot-toast';
 import { CheckCircle , XCircle } from 'lucide-react';
 // ✅ Validator for new orders
-const isValidOrder = (data: unknown): data is Order => {
+const isValidOrder = (data: any): data is OrderActionEvent => {
   if (typeof data !== "object" || data === null) return false;
-  const obj = data as Record<string, unknown>;
   return (
-    typeof obj.orderId === "string" &&
-    typeof obj.totalOrderAmount === "string" &&
-    typeof obj.totalQuantity === "string" &&
-    typeof obj.orderDescription === "string" &&
-    Array.isArray(obj.orderItems)
+    typeof data.orderId === "string" &&
+    typeof data.totalOrderAmount === "string" &&
+    Array.isArray(data.orderItems)
   );
 };
 
 // ── WebSocket Hook ───────────────────────────────────────
-export const useOrderWebSocket = () => {
+export const useOrderWebsocket = () => {
   const [isConnected, setIsConnected] = useState(false);
   const jwt = useAuthStore((state) => state.jwt);
   const shopId = useAuthStore((state) => state.shopId);
-  const { addOrder, removeOrder } = useOrderStore(); // 
+  const addOrder = useOrderStore((state) => state.addOrder);
+  const removeOrder = useOrderStore((state) => state.removeOrder);
 
   const clientRef = useRef<Client | null>(null);
 
@@ -52,19 +50,19 @@ export const useOrderWebSocket = () => {
         client.subscribe(topic, (message) => {
           try {
             const data = JSON.parse(message.body);
-          
             console.log("🔔 WebSocket Message received:", data);
 
-           
-            // If the backend sends an update saying it's Accepted or Rejected, remove it from grid
-            if (data.status === "ACCEPTED") {
+            // 1. Handle Status Updates (ACCEPTED/REJECTED)
+            const currentStatus = data.status || data.state;
+
+            if (currentStatus === "ACCEPTED") {
               removeOrder(data.orderId);
               toast.success(`${data.orderId} : Order Accepted`, {
                 icon: <CheckCircle className="text-emerald-500 w-6 h-6" />,
                 className: "bg-white text-black font-bold p-4 rounded-xl shadow-[0_4px_20px_rgba(59,130,246,0.15)]",
               });
             } 
-            else if (data.status === "REJECTED") {
+            else if (currentStatus === "REJECTED") {
               removeOrder(data.orderId);
               toast.error(`${data.orderId} : Order Rejected`, {
                 icon: <XCircle className="text-rose-500 w-6 h-6" />,
@@ -78,7 +76,7 @@ export const useOrderWebSocket = () => {
               addOrder(data);
             }
           } catch (e) {
-            console.error("Parse error:", e);
+            console.error("WebSocket Parse error:", e);
           }
         });
       },

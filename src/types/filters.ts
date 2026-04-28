@@ -1,14 +1,18 @@
 export enum OrderStatusFilter {
-  ALL = "ALL",
+  PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
+  COMPLETED = "COMPLETED",
   REJECTED = "REJECTED",
+  CANCELLED = "CANCELLED",
 }
 
 export enum TimeFilterOption {
-  ALL = "ALL",
   LAST_30_MIN = "LAST_30_MIN",
+  LAST_1_HOUR = "LAST_1_HOUR",
+  LAST_3_HOUR = "LAST_3_HOUR",
   TODAY = "TODAY",
   LAST_WEEK = "LAST_WEEK",
+  LAST_1_MONTH = "LAST_1_MONTH",
   THIS_MONTH = "THIS_MONTH",
   THIS_YEAR = "THIS_YEAR",
   CUSTOM = "CUSTOM",

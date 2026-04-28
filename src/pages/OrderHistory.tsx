@@ -5,7 +5,7 @@ import FilterBar from "../components/orders/FilterBar";
 import OrderTable from "../components/orders/OrderTable";
 import { RefreshCw, AlertCircle } from "lucide-react";
 import OrderDetailModal from "../components/orders/OrderDetailModal";
-import type { Order } from "../types/order";
+import type { Order, OrderApiResponse } from "../types/order";
 import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
 
 
@@ -17,21 +17,28 @@ const OrderHistory = () => {
   const shopId = useAuthStore((s) => s.shopId);
 
   // ─── Filter state ────────────────────────────────────────────
-  const [statusFilter, setStatusFilter] = useState<OrderStatusFilter | undefined>(undefined);
-  const [timeFilter, setTimeFilter] = useState<TimeFilterOption | undefined>(undefined);
+  const [orderStatus, setOrderStatus] = useState<OrderStatusFilter[]>([]);
+  const [timeRange, setTimeRange] = useState<TimeFilterOption | undefined>(undefined);
   const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<OrderApiResponse | null>(null);
+
+  // ─── Helper: Format Date for Backend (YYYY-MM-DDTHH:mm:ss) ──────
+  const formatForBackend = (date: Date | null) => {
+    if (!date) return undefined;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  };
 
   // ─── RTK Query: fetch filtered orders ────────────────────────
   const { data: orders = [], isLoading, isError, refetch, isFetching } =
     useGetVendorOrdersQuery(
       {
         shopId: shopId ?? "",
-        status: statusFilter,
-        timeFilter: timeFilter,
-        startDate: customStartDate?.toISOString() || undefined,
-        endDate: customEndDate?.toISOString() || undefined,
+        orderStatus: orderStatus.length > 0 ? orderStatus : undefined,
+        timeRange: timeRange,
+        fromTime: formatForBackend(customStartDate),
+        toTime: formatForBackend(customEndDate),
       },
       { skip: !shopId }
     );
@@ -42,12 +49,10 @@ const OrderHistory = () => {
   // ─── Handler: status change ──────────────────────────────────
   const handleStatusChange = (status: string) => {
     if (status === "ALL") {
-      setStatusFilter(undefined);
-      setTimeFilter(undefined);
-      setCustomStartDate(null);
-      setCustomEndDate(null);
+      setOrderStatus([]);
     } else {
-      setStatusFilter(status as OrderStatusFilter);
+      // For now, we only select one status at a time to match UI pills
+      setOrderStatus([status as OrderStatusFilter]);
     }
     setCurrentPage(1);
   };
@@ -55,9 +60,9 @@ const OrderHistory = () => {
   // ─── Handler: time change ────────────────────────────────────
   const handleTimeChange = (time: string) => {
     if (time === "ALL") {
-      setTimeFilter(undefined);
+      setTimeRange(undefined);
     } else {
-      setTimeFilter(time as TimeFilterOption);
+      setTimeRange(time as TimeFilterOption);
     }
     setCustomStartDate(null);
     setCustomEndDate(null);
@@ -68,6 +73,9 @@ const OrderHistory = () => {
   const handleCustomDateChange = (start: Date | null, end: Date | null) => {
     setCustomStartDate(start);
     setCustomEndDate(end);
+    if (start && end) {
+      setTimeRange(TimeFilterOption.CUSTOM);
+    }
     setCurrentPage(1);
   };
 
@@ -98,11 +106,12 @@ const OrderHistory = () => {
         </button>
       </div>
 
-      {/* Filters */}
+      {/* Filters (Hidden until backend is ready) */}
+      
       <div className="mb-5">
         <FilterBar
-          statusFilter={statusFilter || "ALL"}
-          timeFilter={timeFilter || "ALL"}
+          statusFilter={orderStatus.length > 0 ? orderStatus[0] : "ALL"}
+          timeFilter={timeRange || "ALL"}
           customStartDate={customStartDate}
           customEndDate={customEndDate}
           onStatusChange={handleStatusChange}
@@ -110,6 +119,7 @@ const OrderHistory = () => {
           onCustomDateChange={handleCustomDateChange}
         />
       </div>
+     
 
       {/* Loading state */}
       {isLoading && (

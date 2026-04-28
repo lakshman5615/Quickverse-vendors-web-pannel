@@ -4,9 +4,11 @@ import { OrderStatusFilter, TimeFilterOption } from "../../types/filters";
 
 // ─── Constants ──────────────────────────────────────────────────
 const STATUS_OPTIONS = [
-  { label: "All", value: OrderStatusFilter.ALL },
+  { label: "All", value: "ALL" },
   { label: "Accepted", value: OrderStatusFilter.ACCEPTED },
   { label: "Rejected", value: OrderStatusFilter.REJECTED },
+  { label: "Completed", value: OrderStatusFilter.COMPLETED },
+  { label: "Cancelled", value: OrderStatusFilter.CANCELLED },
 ];
 
 const TIME_OPTIONS = [
