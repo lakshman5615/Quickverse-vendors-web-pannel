@@ -10,6 +10,7 @@ import {
   useRequestOtpMutation,
 } from "../apis/authentication"; 
 import { useAuthStore } from "../stores/useAuthStore";
+import { unlockAudio } from "../utils/audio";
 
 const MOBILE_LENGTH = 10;
 const INDIAN_MOBILE_REGEX = /^[6-9]\d{9}$/;
@@ -69,6 +70,8 @@ const Authentication = () => {
   };
 
   const handleVerifyOtp = async () => {
+    // await use for wait unlock audio 
+     void unlockAudio(); 
     try {
       if (!verificationId) {
         toast.error("Please request OTP again");

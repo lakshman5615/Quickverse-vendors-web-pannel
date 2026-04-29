@@ -1,37 +1,47 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { useOrderWebsocket } from "../hooks/useOrderWebsocket";
 import { useOrderStore } from "../stores/useOrderStore"; // 
+import { notificationAudio } from "../utils/audio";
+import { useCallback } from "react";
 
 const Layout = () => {
   // 1. Initialize WebSocket (No arguments needed now)
   const isConnected = useOrderWebsocket();
-  
+  const isPlayingRef = useRef(false); // Add this at the top with other hooks
+
   // 2. Get incoming orders and viewed status from the store to manage sound
+  const [isAudioBlocked, setIsAudioBlocked] = useState(false);
   const incomingOrders = useOrderStore((state) => state.incomingOrders);
   const viewedOrderIds = useOrderStore((state) => state.viewedOrderIds);
-  
-  // 3. Audio Setup
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    // Create audio instance once
-    audioRef.current = new Audio("/Alert_ringtone.mp3");
-    audioRef.current.loop = true;
-  }, []);
-
+  const playIfNeeded = useCallback(() => {
+  const hasUnviewedOrders = incomingOrders.some(
+    order => !viewedOrderIds.has(order.orderId)
+  );
+  if (hasUnviewedOrders && !isPlayingRef.current) {
+    notificationAudio.play()
+      .then(() => {
+        isPlayingRef.current = true;
+      })
+      .catch(() => {
+        setIsAudioBlocked(true);
+      });
+  }
+}, [incomingOrders, viewedOrderIds]);
   useEffect(() => {
     // Check if there is at least one order that hasn't been viewed yet
     const hasUnviewedOrders = incomingOrders.some(order => !viewedOrderIds.has(order.orderId));
 
     //  Play sound if there are UNVIEWED orders, stop if all are viewed (or list is empty)
-    if (hasUnviewedOrders && audioRef.current) {
-      audioRef.current.play().catch(e => console.log("Audio blocked by browser:", e));
-    } else if (!hasUnviewedOrders && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+    if (hasUnviewedOrders) {
+      playIfNeeded();
+    } else {
+      notificationAudio.pause();
+      notificationAudio.currentTime = 0;
+      isPlayingRef.current = false;
     }
   }, [incomingOrders, viewedOrderIds]);
 
@@ -50,6 +60,25 @@ const Layout = () => {
           </div>
         </section>
       </div>
+
+      {isAudioBlocked && (
+        <div className="fixed bottom-4 right-4 z-[100] animate-bounce">
+          <button
+            onClick={() => {
+
+              notificationAudio.play().then(() => {
+                notificationAudio.pause();
+                notificationAudio.currentTime = 0;
+                setIsAudioBlocked(false);
+                playIfNeeded();
+              });
+            }}
+            className="bg-emerald-500 text-black px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2"
+          >
+            🔔 Enable Sound
+          </button>
+        </div>
+      )}
     </main>
   );
 };

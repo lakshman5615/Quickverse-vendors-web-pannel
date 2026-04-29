@@ -106,7 +106,7 @@ const OrderHistory = () => {
         </button>
       </div>
 
-      {/* Filters (Hidden until backend is ready) */}
+    
       
       <div className="mb-5">
         <FilterBar

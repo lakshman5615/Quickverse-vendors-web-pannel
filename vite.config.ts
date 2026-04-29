@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
       origin: "http://prd.quickverse.in/", // 👈 KEY FIX
 
       proxy: {
-        
+
         "/ws": {
           target: env.VITE_API_URL,
           changeOrigin: true,

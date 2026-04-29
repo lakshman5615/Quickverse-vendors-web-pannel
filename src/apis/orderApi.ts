@@ -37,7 +37,7 @@ const orderApi = api.injectEndpoints({
         return {
           url: `/v2/order/${shopId}/orders`,
           method: "GET",
-          params: cleanParams,
+          ...(cleanParams.toString() && { params: cleanParams }),
         };
       },
       transformResponse: (response: { orders: { ordersAsList: OrderApiResponse[] } }) => {
