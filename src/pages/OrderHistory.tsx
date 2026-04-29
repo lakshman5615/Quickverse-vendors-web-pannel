@@ -47,27 +47,31 @@ const OrderHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // ─── Handler: status change ──────────────────────────────────
-  const handleStatusChange = (status: string) => {
-    if (status === "ALL") {
-      setOrderStatus([]);
-    } else {
-      // For now, we only select one status at a time to match UI pills
-      setOrderStatus([status as OrderStatusFilter]);
-    }
-    setCurrentPage(1);
-  };
+ const handleStatusChange = (status: string) => {
+  // If user clicks "ALL" OR clicks a status that is ALREADY selected
+  const isAlreadySelected = orderStatus.includes(status as OrderStatusFilter);
+  
+  if (status === "ALL" || isAlreadySelected) {
+    setOrderStatus([]); // Reset to All
+  } else {
+    setOrderStatus([status as OrderStatusFilter]); // Select new
+  }
+  setCurrentPage(1);
+};
 
   // ─── Handler: time change ────────────────────────────────────
-  const handleTimeChange = (time: string) => {
-    if (time === "ALL") {
-      setTimeRange(undefined);
-    } else {
-      setTimeRange(time as TimeFilterOption);
-    }
-    setCustomStartDate(null);
-    setCustomEndDate(null);
-    setCurrentPage(1);
-  };
+const handleTimeChange = (time: string) => {
+  // If user clicks a time that is ALREADY selected, we set it to undefined
+  if (time === timeRange) {
+    setTimeRange(undefined); 
+  } else {
+    setTimeRange(time as TimeFilterOption);
+  }
+  
+  setCustomStartDate(null);
+  setCustomEndDate(null);
+  setCurrentPage(1);
+};
 
   // ─── Handler: custom date range ──────────────────────────────
   const handleCustomDateChange = (start: Date | null, end: Date | null) => {

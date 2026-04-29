@@ -1,4 +1,4 @@
-import type { OrderApiResponse} from "../../types/order";
+import type { OrderApiResponse } from "../../types/order";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // ─── Status badge color map ─────────────────────────────────────
@@ -27,7 +27,7 @@ const formatDate = (dateString: string): string => {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    
+
     let hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -88,8 +88,8 @@ const OrderTable = ({
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Customer Name</th>
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Items</th>
               <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Status</th>
-              <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right"> Payment Method</th>
-              <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider text-right">Amount</th>
+              <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Payment Method</th>
+              <th className="px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -116,12 +116,14 @@ const OrderTable = ({
                 <td className="px-4 py-3">
                   {renderBadge(order.state, STATUS_STYLES)}
                 </td>
-                <td className="px-4 py-3 text-xs text-zinc-300 text-right">
-                  {order.paymentMethod || "—"}
+                <td className={`text-center px-4 py-3 text-xs font-medium ${order.state === "COMPLETED" ? "text-zinc-300" : "text-zinc-500 text-center"
+                  }`}>
+                  {order.state === "COMPLETED" ? (order.paymentMethod || "—") : "—"}
                 </td>
-                <td className="px-4 py-3 text-xs font-semibold text-emerald-400 text-right">
+                <td className="text-center px-4 py-3 text-xs font-semibold text-emerald-400">
                   ₹{order.totalAmount}
                 </td>
+
               </tr>
             ))}
           </tbody>

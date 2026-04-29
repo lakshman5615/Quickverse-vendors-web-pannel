@@ -4,8 +4,8 @@ import { Client } from "@stomp/stompjs";
 import type { OrderActionEvent } from "../types/order";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useOrderStore } from "../stores/useOrderStore"; // ✅ Added
-import {toast} from 'react-hot-toast';
-import { CheckCircle , XCircle } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { CheckCircle, XCircle } from 'lucide-react';
 // ✅ Validator for new orders
 const isValidOrder = (data: any): data is OrderActionEvent => {
   if (typeof data !== "object" || data === null) return false;
@@ -43,7 +43,7 @@ export const useOrderWebsocket = () => {
         setIsConnected(true);
         console.log("✅ Connected to STOMP");
 
-        
+
         const topic = `/topic/vendor/${shopId}`;
         console.log("📡 Subscribing to:", topic);
 
@@ -61,12 +61,21 @@ export const useOrderWebsocket = () => {
                 icon: <CheckCircle className="text-emerald-500 w-6 h-6" />,
                 className: "bg-white text-black font-bold p-4 rounded-xl shadow-[0_4px_20px_rgba(59,130,246,0.15)]",
               });
-            } 
+            }
             else if (currentStatus === "REJECTED") {
               removeOrder(data.orderId);
               toast.error(`${data.orderId} : Order Rejected`, {
                 icon: <XCircle className="text-rose-500 w-6 h-6" />,
                 className: "bg-white text-black font-bold p-4 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.15)]",
+              });
+            }
+            else if (currentStatus === "CANCELLED") {
+              removeOrder(data.orderId); // This removes the card and stops sound
+              toast.error(`Order #${data.orderId} was Cancelled by Customer`, {
+                duration: 5000,
+                position: "top-center",
+                icon: <XCircle className="text-rose-500 w-6 h-6" />,
+                className: "bg-white text-black font-bold p-4 rounded-xl shadow-[0_4px_20px_rgba(239,68,68,0.15)]",
               });
             }
 
