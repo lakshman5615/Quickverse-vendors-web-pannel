@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 
 
-const Navbar = ({ isConnected }: { isConnected: boolean }) => {
+const Navbar = () => {
   const navigate = useNavigate();
   const { clearSession } = useAuthStore();
 

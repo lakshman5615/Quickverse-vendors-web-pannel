@@ -9,7 +9,7 @@ import { useCallback } from "react";
 
 const Layout = () => {
   // 1. Initialize WebSocket (No arguments needed now)
-  const isConnected = useOrderWebsocket();
+   useOrderWebsocket();
   const isPlayingRef = useRef(false); // Add this at the top with other hooks
 
   // 2. Get incoming orders and viewed status from the store to manage sound
@@ -52,7 +52,7 @@ const Layout = () => {
         <Sidebar />
 
         <section className="h-full w-[85%] rounded-xl border border-zinc-800 bg-zinc-900">
-          <Navbar isConnected={isConnected} />
+          <Navbar  />
 
           <div className="h-[90%] overflow-y-auto p-5">
             {/* Dashboard grid will render here via Outlet */}

@@ -1,9 +1,8 @@
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig} from "vite";
 import react from "@vitejs/plugin-react";
 
-export default defineConfig(({ mode }) => {
-
-  const env = loadEnv(mode, process.cwd(), "");
+export default defineConfig(() => {
+ 
 
   return {
     plugins: [react()],
@@ -11,29 +10,19 @@ export default defineConfig(({ mode }) => {
     define: {
       global: "window",
     },
+
+    build: {
+      outDir: "dist",
+      sourcemap: false,
+    },
+
     server: {
-      host: "0.0.0.0",   // 👈 force external access
+      host: true,
       port: 5173,
-      strictPort: true,
+    },
 
-      allowedHosts: [
-        "heroics-engraved-destruct.ngrok-free.dev"
-      ],
-
-      origin: "http://prd.quickverse.in/", // 👈 KEY FIX
-
-      proxy: {
-
-        "/ws": {
-          target: env.VITE_API_URL,
-          changeOrigin: true,
-          secure: false,
-          ws: true,
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        },
-      },
+    preview: {
+      port: 5173,
     },
   };
 });

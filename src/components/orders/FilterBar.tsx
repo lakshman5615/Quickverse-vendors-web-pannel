@@ -49,9 +49,7 @@ const FilterBar = ({
   const pillInactive =
     "bg-transparent text-zinc-400 border-zinc-700 hover:border-zinc-500 hover:text-zinc-200";
 
-  // Shared dropdown classes
-  const dropdownClass =
-    "bg-zinc-800 text-zinc-300 text-xs rounded-lg px-3 py-1.5 border border-zinc-700 outline-none focus:border-zinc-500 cursor-pointer";
+ 
 
   return (
     <div className="space-y-3">
@@ -101,7 +99,7 @@ const FilterBar = ({
           <div className="flex items-center gap-2">
             <DatePicker
               selected={customStartDate}
-              onChange={(date) => onCustomDateChange(date, customEndDate)}
+              onChange={(date: Date | null) => onCustomDateChange(date, customEndDate)}
               placeholderText="From date"
               dateFormat="dd MMM yyyy"
               maxDate={customEndDate || new Date()}
@@ -114,7 +112,7 @@ const FilterBar = ({
             <span className="text-zinc-600 text-xs">→</span>
             <DatePicker
               selected={customEndDate}
-              onChange={(date) => onCustomDateChange(customStartDate, date)}
+              onChange={(date: Date | null) => onCustomDateChange(customStartDate, date)}
               placeholderText="To date"
               dateFormat="dd MMM yyyy"
               minDate={customStartDate || undefined}

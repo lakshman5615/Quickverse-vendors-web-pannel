@@ -6,6 +6,8 @@ import { useAuthStore } from "../stores/useAuthStore";
 import { useOrderStore } from "../stores/useOrderStore"; // ✅ Added
 import { toast } from 'react-hot-toast';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { baseurl } from "../apis";
+
 // ✅ Validator for new orders
 const isValidOrder = (data: any): data is OrderActionEvent => {
   if (typeof data !== "object" || data === null) return false;
@@ -33,7 +35,7 @@ export const useOrderWebsocket = () => {
     }
 
     const client = new Client({
-      webSocketFactory: () => new SockJS("/ws"), // 
+      webSocketFactory: () => new SockJS(baseurl+"/ws"), // 
       debug: (str) => console.log("STOMP:", str),
       reconnectDelay: 5000,
       connectHeaders: {
