@@ -35,7 +35,7 @@ export const useOrderWebsocket = () => {
     }
 
     const client = new Client({
-      webSocketFactory: () => new SockJS(baseurl+"/ws"), // 
+      webSocketFactory: () => new SockJS(baseurl+"ws"), // 
       debug: (str) => console.log("STOMP:", str),
       reconnectDelay: 5000,
       connectHeaders: {

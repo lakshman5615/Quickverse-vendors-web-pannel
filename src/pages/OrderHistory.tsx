@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useGetVendorOrdersQuery } from "../apis/orderApi";
 import FilterBar from "../components/orders/FilterBar";
@@ -8,96 +8,65 @@ import OrderDetailModal from "../components/orders/OrderDetailModal";
 import type { OrderApiResponse } from "../types/order";
 import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
 
-
-
 const PAGE_SIZE = 100;
 
 const OrderHistory = () => {
-  // ─── Auth ─────────────────────────────────────────────────────
   const shopId = useAuthStore((s) => s.shopId);
 
-  // ─── Filter state ────────────────────────────────────────────
   const [orderStatus, setOrderStatus] = useState<OrderStatusFilter[]>([]);
   const [timeRange, setTimeRange] = useState<TimeFilterOption | undefined>(undefined);
   const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<OrderApiResponse | null>(null);
+  const [currentPage, setCurrentPage] = useState(0); // 0-indexed for backend
 
-  // ─── Helper: Format Date for Backend (YYYY-MM-DDTHH:mm:ss) ──────
   const formatForBackend = (date: Date | null) => {
     if (!date) return undefined;
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   };
 
-  // ─── RTK Query: fetch filtered orders ────────────────────────
-  const { data: orders = [], isLoading, isError, refetch, isFetching } =
+  const { data, isLoading, isError, refetch, isFetching } =
     useGetVendorOrdersQuery(
       {
         shopId: shopId ?? "",
         orderStatus: orderStatus.length > 0 ? orderStatus : undefined,
-        timeRange: timeRange,
+        timeRange,
         fromTime: formatForBackend(customStartDate),
         toTime: formatForBackend(customEndDate),
+        page: currentPage,
+        size: PAGE_SIZE,
       },
       { skip: !shopId }
     );
 
-  // ─── Pagination state ────────────────────────────────────────
-  const [currentPage, setCurrentPage] = useState(1);
+  const handleStatusChange = (status: string) => {
+    const isAlreadySelected = orderStatus.includes(status as OrderStatusFilter);
+    setOrderStatus(status === "ALL" || isAlreadySelected ? [] : [status as OrderStatusFilter]);
+    setCurrentPage(0);
+  };
 
-  // ─── Handler: status change ──────────────────────────────────
- const handleStatusChange = (status: string) => {
-  // If user clicks "ALL" OR clicks a status that is ALREADY selected
-  const isAlreadySelected = orderStatus.includes(status as OrderStatusFilter);
-  
-  if (status === "ALL" || isAlreadySelected) {
-    setOrderStatus([]); // Reset to All
-  } else {
-    setOrderStatus([status as OrderStatusFilter]); // Select new
-  }
-  setCurrentPage(1);
-};
+  const handleTimeChange = (time: string) => {
+    setTimeRange(time === timeRange ? undefined : time as TimeFilterOption);
+    setCustomStartDate(null);
+    setCustomEndDate(null);
+    setCurrentPage(0);
+  };
 
-  // ─── Handler: time change ────────────────────────────────────
-const handleTimeChange = (time: string) => {
-  // If user clicks a time that is ALREADY selected, we set it to undefined
-  if (time === timeRange) {
-    setTimeRange(undefined); 
-  } else {
-    setTimeRange(time as TimeFilterOption);
-  }
-  
-  setCustomStartDate(null);
-  setCustomEndDate(null);
-  setCurrentPage(1);
-};
-
-  // ─── Handler: custom date range ──────────────────────────────
   const handleCustomDateChange = (start: Date | null, end: Date | null) => {
     setCustomStartDate(start);
     setCustomEndDate(end);
-    if (start && end) {
-      setTimeRange(TimeFilterOption.CUSTOM);
-    }
-    setCurrentPage(1);
+    if (start && end) setTimeRange(TimeFilterOption.CUSTOM);
+    setCurrentPage(0);
   };
 
-  // ─── Compute: paginated orders ───────────────────────────────
-  const paginatedOrders = useMemo(() => {
-    const startIdx = (currentPage - 1) * PAGE_SIZE;
-    return orders.slice(startIdx, startIdx + PAGE_SIZE);
-  }, [orders, currentPage]);
-
-  // ─── Render ──────────────────────────────────────────────────
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5 min-h-full">
-      {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-xl font-semibold text-zinc-100">Order History</h2>
           <p className="text-sm text-zinc-500 mt-0.5">
-            {orders.length} order{orders.length !== 1 ? "s" : ""} found
+            {data?.totalElements ?? 0} order{(data?.totalElements ?? 0) !== 1 ? "s" : ""} found
           </p>
         </div>
         <button
@@ -110,8 +79,6 @@ const handleTimeChange = (time: string) => {
         </button>
       </div>
 
-    
-      
       <div className="mb-5">
         <FilterBar
           statusFilter={orderStatus.length > 0 ? orderStatus[0] : "ALL"}
@@ -123,9 +90,7 @@ const handleTimeChange = (time: string) => {
           onCustomDateChange={handleCustomDateChange}
         />
       </div>
-     
 
-      {/* Loading state */}
       {isLoading && (
         <div className="flex items-center justify-center py-20">
           <div className="flex items-center gap-3 text-zinc-400">
@@ -135,7 +100,6 @@ const handleTimeChange = (time: string) => {
         </div>
       )}
 
-      {/* Error state */}
       {isError && (
         <div className="flex flex-col items-center justify-center py-20 text-rose-400">
           <AlertCircle size={32} className="mb-2" />
@@ -149,24 +113,24 @@ const handleTimeChange = (time: string) => {
         </div>
       )}
 
-      {/* Table */}
       {!isLoading && !isError && (
         <OrderTable
-          orders={paginatedOrders}
+          orders={data?.orders ?? []}
           currentPage={currentPage}
           pageSize={PAGE_SIZE}
-          totalOrders={orders.length}
+          totalPages={data?.totalPages ?? 0}
+          totalElements={data?.totalElements ?? 0}
           onPageChange={setCurrentPage}
           onOrderClick={setSelectedOrder}
         />
       )}
+
       {selectedOrder && (
         <OrderDetailModal
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
         />
       )}
-
     </div>
   );
 };

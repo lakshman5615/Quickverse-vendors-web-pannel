@@ -13,6 +13,13 @@ export interface OrderActionEvent {
   createdAt: string;
   createdBy: string;
 }
+export interface PaginatedOrderResponse {
+  orders: OrderApiResponse[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+}
+
 export interface OrderApiResponse {
    orderId: string;
    campusId: string;

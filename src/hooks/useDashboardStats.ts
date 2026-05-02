@@ -1,36 +1,48 @@
 import { useMemo } from 'react';
 import { useGetVendorOrdersQuery } from '../apis/orderApi';
 import { useAuthStore } from '../stores/useAuthStore';
+import { OrderStatusFilter } from '../types/filters';
 
 export const useDashboardStats = () => {
   const { shopId } = useAuthStore();
-  
 
-  const { data: allOrders, isLoading, isFetching, refetch } = useGetVendorOrdersQuery(
-    { shopId: shopId ?? "" },
+  const { data: allData, isLoading: l1, isFetching: f1, refetch: r1 } = useGetVendorOrdersQuery(
+    { shopId: shopId ?? "", page: 0, size: 1 },
     { skip: !shopId }
   );
 
-  
-  const stats = useMemo(() => {
-    const defaultStats = { total: 0, revenue: "₹0", accepted: 0, rejected: 0 };
-    if (!allOrders) return defaultStats;
+  const { data: acceptedData, isLoading: l2, isFetching: f2, refetch: r2 } = useGetVendorOrdersQuery(
+    { shopId: shopId ?? "", orderStatus: [OrderStatusFilter.ACCEPTED], page: 0, size: 1 },
+    { skip: !shopId }
+  );
 
-    const total = allOrders.length;
-    const acceptedCount = allOrders.filter(o => o.state === "ACCEPTED").length;
-    const rejectedCount = allOrders.filter(o => o.state === "REJECTED").length;
-    const completedOrders = allOrders.filter(o => o.state === "COMPLETED");
-    
-    const revenueSum = completedOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  const { data: rejectedData, isLoading: l3, isFetching: f3, refetch: r3 } = useGetVendorOrdersQuery(
+    { shopId: shopId ?? "", orderStatus: [OrderStatusFilter.REJECTED], page: 0, size: 1 },
+    { skip: !shopId }
+  );
+
+  const { data: completedData, isLoading: l4, isFetching: f4, refetch: r4 } = useGetVendorOrdersQuery(
+    { shopId: shopId ?? "", orderStatus: [OrderStatusFilter.COMPLETED], page: 0, size: 100 },
+    { skip: !shopId }
+  );
+
+  const stats = useMemo(() => {
+    const revenueSum = (completedData?.orders ?? [])
+      .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
     return {
-      total,
+      total: allData?.totalElements ?? 0,
       revenue: `₹${revenueSum.toLocaleString('en-IN')}`,
-      accepted: acceptedCount,
-      rejected: rejectedCount
+      accepted: acceptedData?.totalElements ?? 0,
+      rejected: rejectedData?.totalElements ?? 0,
     };
-  }, [allOrders]);
+  }, [allData, acceptedData, rejectedData, completedData]);
 
-  
-  return { stats, isLoading: isLoading || isFetching, refresh: refetch };
+  const refresh = () => { r1(); r2(); r3(); r4(); };
+
+  return {
+    stats,
+    isLoading: l1 || l2 || l3 || l4 || f1 || f2 || f3 || f4,
+    refresh
+  };
 };

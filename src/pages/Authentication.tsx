@@ -92,8 +92,8 @@ const Authentication = () => {
 
       console.log("Otp Verification Response : ", response);
 
-      saveSession(response.jwt, response.shopId, response.phone);
-
+      saveSession(response.jwt, String(response.shopId), response.phone); 
+      
       setShowOtpModal(false);
       toast.success("Login successful ✅");
       navigate("/vendor/dashboard", { replace: true });
