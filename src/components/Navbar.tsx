@@ -1,6 +1,7 @@
 import { useAuthStore } from "../stores/useAuthStore";
 import { CustomButton } from "./common";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 
 
@@ -19,6 +20,7 @@ const Navbar = () => {
         className="px-3 py-2 text-xs"
         onClick={() => {
           clearSession();
+          toast.success("Vendor logout ✅");
           navigate("/", { replace: true });
         }}
       >

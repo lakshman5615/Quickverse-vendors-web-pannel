@@ -1,6 +1,8 @@
 import { useMemo, useRef } from "react";
 import type { ClipboardEvent, FormEvent, KeyboardEvent } from "react";
 import { CustomButton } from "./common";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 type OtpModalProps = {
   mobileNumber: string;
@@ -22,6 +24,26 @@ const OtpModal = ({
   isSubmitting = false,
 }: OtpModalProps) => {
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  const [timeLeft, setTimeLeft] = useState(59);
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  const formatTime = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
+  };
 
   const isOtpComplete = useMemo(
     () => otpDigits.every((digit) => digit.trim() !== ""),
@@ -69,6 +91,7 @@ const OtpModal = ({
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (isOtpComplete) {
+      setTimeLeft(0);
       onSubmit();
     }
   };
@@ -76,18 +99,25 @@ const OtpModal = ({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
       <div className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm shadow-black/30">
+
         <div className="mb-6 flex items-start justify-between">
           <div>
             <h2 className="text-lg font-semibold text-zinc-100">Verify OTP</h2>
             <p className="mt-1 text-sm text-zinc-400">
               Enter the 4-digit code sent to +91 {mobileNumber}
             </p>
+            <div className="mt-4 text-sm font-medium text-red-500">
+              Resend OTP in:{formatTime(timeLeft)}
+            </div>
           </div>
           <CustomButton
             type="button"
             variant="secondary"
             className="px-2 py-1 text-sm"
-            onClick={onClose}
+            onClick={() => {
+              setTimeLeft(0);
+              onClose();
+            }}
           >
             Close
           </CustomButton>
@@ -126,13 +156,35 @@ const OtpModal = ({
           </CustomButton>
         </form>
 
-        <CustomButton
+        {/* <CustomButton
           type="button"
-          onClick={onResendOtp}
-          disabled={isSubmitting}
+          onClick={() => {
+            setTimeLeft(59);
+            onResendOtp();
+          }}
+          disabled={timeLeft >0 || isSubmitting}
           variant="secondary"
           fullWidth
           className="mt-2"
+        >
+          Resend OTP
+        </CustomButton> */}
+        <CustomButton
+          type="button"
+          variant="secondary"
+          fullWidth
+          className={`mt-2 ${timeLeft > 0 ? "opacity-50 cursor-not-allowed" : ""}`} // Make it look disabled when timer is running
+          onClick={() => {
+            if (timeLeft > 0) {
+              toast.error(`Please wait, you can resend OTP in ${timeLeft}s`, {
+                id: "resend-wait",
+              });
+            } else {
+              setTimeLeft(59);
+              onResendOtp();
+            }
+          }}
+          disabled={isSubmitting} // Only disable for real when the API is loading
         >
           Resend OTP
         </CustomButton>

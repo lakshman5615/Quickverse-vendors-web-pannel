@@ -6,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 import OtpModal from "../components/Otpmodal";
 import { CustomButton, TextInput } from "../components/common";
 import {
-  useLoginMutation, 
+  useLoginMutation,
   useRequestOtpMutation,
-} from "../apis/authentication"; 
+} from "../apis/authentication";
 import { useAuthStore } from "../stores/useAuthStore";
 import { unlockAudio } from "../utils/audio";
 
@@ -20,11 +20,12 @@ const Authentication = () => {
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
   const [verificationId, setVerificationId] = useState("");
+
   const { isAuthenticated, saveSession } = useAuthStore();
 
   const [requestOtp, { isLoading: isRequestingOtp }] = useRequestOtpMutation();
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
-  
+
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -51,12 +52,16 @@ const Authentication = () => {
         console.log("OTP Response:", response);
 
         setVerificationId(response.response?.verificationId ?? "");
-       
+
         setOtpDigits(["", "", "", ""]);
         setShowOtpModal(true);
         toast.success("OTP sent via SMS");
       } catch (error: any) {
-        toast.error(error?.data?.error?.message);
+        const errorMessage = error?.data?.error?.message || "Failed to send OTP. Please try again.";
+
+        toast.error(errorMessage, {
+          id: "otp-error"
+        });
       }
     },
   });
@@ -70,8 +75,7 @@ const Authentication = () => {
   };
 
   const handleVerifyOtp = async () => {
-    // await use for wait unlock audio 
-     void unlockAudio(); 
+    void unlockAudio();
     try {
       if (!verificationId) {
         toast.error("Please request OTP again");
@@ -88,13 +92,16 @@ const Authentication = () => {
 
       console.log("Otp Verification Response : ", response);
 
-      saveSession(response.jwt, response.shopId, response.phone); 
-      
+      saveSession(response.jwt, response.shopId, response.phone);
+
       setShowOtpModal(false);
-      toast.success("Login successful");
+      toast.success("Login successful ✅");
       navigate("/vendor/dashboard", { replace: true });
     } catch (error: any) {
-      toast.error(error?.data?.error?.message);
+      const errorMessage = error?.data?.error?.message || "Invalid OTP";
+      toast.error(errorMessage, {
+        id: "otp-error"
+      });
     }
   };
 
@@ -104,7 +111,7 @@ const Authentication = () => {
 
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-6">
-      
+
       <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-3xl items-center justify-center">
         <section className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm shadow-black/30">
           <h1 className="mb-6 text-center text-3xl font-semibold text-zinc-100">
@@ -144,9 +151,9 @@ const Authentication = () => {
             We will send otp though sms
           </p>
         </section>
-        
+
       </div>
-      
+
 
       {showOtpModal ? (
         <OtpModal
@@ -156,6 +163,7 @@ const Authentication = () => {
           onChangeDigit={handleChangeOtpDigit}
           onSubmit={handleVerifyOtp}
           onResendOtp={handleResendOtp}
+
           isSubmitting={isLoggingIn}
         />
       ) : null}
