@@ -4,7 +4,7 @@ export const baseurl = import.meta.env.VITE_API_URL;
 const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${baseurl}/quickVerse`,
+    baseUrl: `${baseurl}quickVerse`,
     prepareHeaders: (headers) => {
       headers.set("Authorization", `Basic ${import.meta.env.VITE_API_BASIC_TOKEN}`);
       headers.set("Content-Type", "application/json");

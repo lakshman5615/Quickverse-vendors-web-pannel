@@ -8,7 +8,7 @@ import OrderDetailModal from "../components/orders/OrderDetailModal";
 import type { OrderApiResponse } from "../types/order";
 import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 50;
 
 const OrderHistory = () => {
   const shopId = useAuthStore((s) => s.shopId);
