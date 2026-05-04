@@ -2,6 +2,13 @@ import api from "./index";
 import type { PaginatedOrderResponse } from "../types/order";
 import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
 
+export interface DashboardSummary {
+  totalOrders: number;
+  totalRevenue: number;
+  acceptedOrders: number;
+  rejectedOrders: number;
+}
+
 export interface OrderFilterParams {
   shopId: string;
   orderStatus?: OrderStatusFilter[];
@@ -14,6 +21,13 @@ export interface OrderFilterParams {
 
 const orderApi = api.injectEndpoints({
   endpoints: (build) => ({
+    getDashboardSummary: build.query<DashboardSummary, string>({
+      query: (shopId) => ({
+        url: `/v3/vendor/dashboard/summary`,
+        method: "GET",
+        params: { shopId },
+      }),
+    }),
     getVendorOrders: build.query<PaginatedOrderResponse, OrderFilterParams>({
       query: ({ shopId, ...filters }) => {
         const cleanParams = new URLSearchParams();
@@ -40,4 +54,4 @@ const orderApi = api.injectEndpoints({
   }),
 });
 
-export const { useGetVendorOrdersQuery } = orderApi;
+export const { useGetVendorOrdersQuery, useGetDashboardSummaryQuery } = orderApi;
