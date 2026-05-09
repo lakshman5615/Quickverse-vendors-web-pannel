@@ -10,7 +10,7 @@ export const StatCard = ({ title, value, trend }: StatCardProps) => (
         <p className="text-zinc-500 text-sm font-medium uppercase tracking-wider">{title}</p>
         <div className="flex items-end justify-between mt-2">
             <h3 className="text-3xl font-bold text-white">{value}</h3>
-            {trend && <span className="text-xs text-emerald-400 font-mono">{trend}</span>}
+
         </div>
     </div>
 );
