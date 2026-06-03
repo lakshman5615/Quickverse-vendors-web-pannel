@@ -1,24 +1,36 @@
-import { useGetDashboardSummaryQuery } from '../apis/orderApi';
+import { useMemo } from 'react';
+import { useGetVendorOrdersQuery } from '../apis/orderApi';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export const useDashboardStats = () => {
   const { shopId } = useAuthStore();
+  
 
-  const { data, isLoading, isFetching, refetch } = useGetDashboardSummaryQuery(
-    shopId ?? '',
+  const { data: allOrders, isLoading, isFetching, refetch } = useGetVendorOrdersQuery(
+    { shopId: shopId ?? "" },
     { skip: !shopId }
   );
 
-  const stats = {
-    total: data?.totalOrders ?? 0,
-    revenue: `₹${(data?.totalRevenue ?? 0).toLocaleString('en-IN')}`,
-    accepted: data?.acceptedOrders ?? 0,
-    rejected: data?.rejectedOrders ?? 0,
-  };
+  
+  const stats = useMemo(() => {
+    const defaultStats = { total: 0, revenue: "₹0", accepted: 0, rejected: 0 };
+    if (!allOrders) return defaultStats;
 
-  return {
-    stats,
-    isLoading: isLoading || isFetching,
-    refresh: refetch,
-  };
+    const total = allOrders.length;
+    const acceptedCount = allOrders.filter(o => o.state === "ACCEPTED").length;
+    const rejectedCount = allOrders.filter(o => o.state === "REJECTED").length;
+    const completedOrders = allOrders.filter(o => o.state === "COMPLETED");
+    
+    const revenueSum = completedOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+    return {
+      total,
+      revenue: `₹${revenueSum.toLocaleString('en-IN')}`,
+      accepted: acceptedCount,
+      rejected: rejectedCount
+    };
+  }, [allOrders]);
+
+  
+  return { stats, isLoading: isLoading || isFetching, refresh: refetch };
 };

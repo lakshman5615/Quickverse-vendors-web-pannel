@@ -1,57 +1,50 @@
 import api from "./index";
-import type { PaginatedOrderResponse } from "../types/order";
+import type { OrderApiResponse } from "../types/order";
 import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
-
-export interface DashboardSummary {
-  totalOrders: number;
-  totalRevenue: number;
-  acceptedOrders: number;
-  rejectedOrders: number;
-}
 
 export interface OrderFilterParams {
   shopId: string;
-  orderStatus?: OrderStatusFilter[];
+  orderStatus?: OrderStatusFilter[]; // Backend expects List<String>
   timeRange?: TimeFilterOption;
   fromTime?: string;
   toTime?: string;
-  page?: number;
-  size?: number;
 }
 
 const orderApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getDashboardSummary: build.query<DashboardSummary, string>({
-      query: (shopId) => ({
-        url: `/v3/vendor/dashboard/summary`,
-        method: "GET",
-        params: { shopId },
-      }),
-    }),
-    getVendorOrders: build.query<PaginatedOrderResponse, OrderFilterParams>({
+    getVendorOrders: build.query<OrderApiResponse[], OrderFilterParams>({
       query: ({ shopId, ...filters }) => {
         const cleanParams = new URLSearchParams();
 
+        // 1. Add orderStatus array (multiple params with same name)
         if (filters.orderStatus && filters.orderStatus.length > 0) {
-          filters.orderStatus.forEach(status => cleanParams.append("orderStatus", status));
+          filters.orderStatus.forEach(status => {
+            cleanParams.append("orderStatus", status);
+          });
         }
-        if (filters.timeRange) cleanParams.append("timeRange", filters.timeRange);
+
+        // 2. Add timeRange
+        if (filters.timeRange) {
+          cleanParams.append("timeRange", filters.timeRange);
+        }
+
+        // 3. Add fromTime/toTime for CUSTOM range
         if (filters.timeRange === TimeFilterOption.CUSTOM) {
           if (filters.fromTime) cleanParams.append("fromTime", filters.fromTime);
           if (filters.toTime) cleanParams.append("toTime", filters.toTime);
         }
-        cleanParams.append("page", String(filters.page ?? 0));
-        cleanParams.append("size", String(filters.size ?? 15));
 
         return {
           url: `/v2/order/${shopId}/orders`,
           method: "GET",
-          params: cleanParams,
+          ...(cleanParams.toString() && { params: cleanParams }),
         };
       },
-      transformResponse: (raw: { response: PaginatedOrderResponse }) => raw.response,
+      transformResponse: (response: { orders: { ordersAsList: OrderApiResponse[] } }) => {
+        return response.orders.ordersAsList || [];
+      },
     }),
   }),
 });
 
-export const { useGetVendorOrdersQuery, useGetDashboardSummaryQuery } = orderApi;
+export const { useGetVendorOrdersQuery } = orderApi;
