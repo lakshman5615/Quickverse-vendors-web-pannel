@@ -1,13 +1,21 @@
+
 import api from "./index";
 import type { OrderApiResponse } from "../types/order";
 import { OrderStatusFilter, TimeFilterOption } from "../types/filters";
 
 export interface OrderFilterParams {
   shopId: string;
-  orderStatus?: OrderStatusFilter[]; // Backend expects List<String>
+  orderStatus?: OrderStatusFilter[]; 
   timeRange?: TimeFilterOption;
   fromTime?: string;
   toTime?: string;
+}
+
+
+interface BackendOrderPayload {
+  response: {
+    orders: OrderApiResponse[];
+  };
 }
 
 const orderApi = api.injectEndpoints({
@@ -40,8 +48,9 @@ const orderApi = api.injectEndpoints({
           ...(cleanParams.toString() && { params: cleanParams }),
         };
       },
-      transformResponse: (response: { orders: { ordersAsList: OrderApiResponse[] } }) => {
-        return response.orders.ordersAsList || [];
+      
+      transformResponse: (response: BackendOrderPayload): OrderApiResponse[] => {
+        return response?.response?.orders || [];
       },
     }),
   }),
