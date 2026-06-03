@@ -106,8 +106,9 @@ const OrderTable = ({
                 <td className="px-4 py-3 text-xs text-zinc-400 whitespace-nowrap">
                   {formatDate(order.creationTime)}
                 </td>
-                <td className="px-4 py-3 text-xs text-zinc-300">
-                  {order.customerName || "—"}
+                <td
+                  className="px-4 py-3 text-xs text-zinc-300 max-w-[180px] truncate"
+                  title={order.customerName || "—"} > {order.customerName || "—"}
                 </td>
                 <td className="px-4 py-3 text-xs text-zinc-300">
                   {order.totalItemCount} Items

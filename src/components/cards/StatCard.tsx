@@ -5,7 +5,7 @@ interface StatCardProps {
     trend?: string;
 }
 
-export const StatCard = ({ title, value, trend }: StatCardProps) => (
+export const StatCard = ({ title, value, }: StatCardProps) => (
     <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
         <p className="text-zinc-500 text-sm font-medium uppercase tracking-wider">{title}</p>
         <div className="flex items-end justify-between mt-2">
