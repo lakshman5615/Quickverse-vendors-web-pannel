@@ -23,7 +23,7 @@ const formatDate = (dateString: string): string => {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    
+
     let hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -96,14 +96,14 @@ const OrderDetailModal = ({ order, onClose }: OrderDetailModalProps) => {
           </div>
           {/* Grid: Key details */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl bg-zinc-800/50 border border-zinc-800 p-3.5">
+            <div className="rounded-xl bg-zinc-800/50 border border-zinc-800 p-3.5 min-w-0">
               <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-1">Customer</p>
-              <p className="text-sm font-medium text-zinc-200">{order.customerName || "—"}</p>
+              <p className="text-sm font-medium text-zinc-200 truncate" title={order.customerName || "—"}> {order.customerName || "—"} </p>
             </div>
 
-            <div className="rounded-xl bg-zinc-800/50 border border-zinc-800 p-3.5">
+            <div className="rounded-xl bg-zinc-800/50 border border-zinc-800 p-3.5 min-w-0">
               <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-1">Timestamp</p>
-              <p className="text-sm font-medium text-zinc-200">{formatDate(order.creationTime)}</p>
+              <p className="text-sm font-medium text-zinc-200 truncate" title={formatDate(order.creationTime)}> {formatDate(order.creationTime)}</p>
             </div>
 
             <div className="rounded-xl bg-zinc-800/50 border border-zinc-800 p-3.5">

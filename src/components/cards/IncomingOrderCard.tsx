@@ -1,8 +1,8 @@
-import type { OrderActionEvent } from "../../types/order";
-import { useOrderStore } from "../../stores/useOrderStore";
-import { Copy, Check } from 'lucide-react';
+import { Check, Copy } from 'lucide-react';
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useOrderStore } from "../../stores/useOrderStore";
+import type { OrderActionEvent } from "../../types/order";
 
 const formatPhone = (phone: string) => {
   if (!phone) return "";
@@ -52,15 +52,17 @@ export const IncomingOrderCard = ({ order }: { order: OrderActionEvent }) => {
   const cleanPhone = formatPhone(order.customerPhone);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const handleCopy = (text: string, field: string) => {
+  const handleCopy = async (text: string, field: string) => {
+    if (!text) return;
+
     try {
-      navigator.clipboard.writeText(text);
+   
+      await navigator.clipboard.writeText(text);
       setCopiedField(field);
-
-
       setTimeout(() => setCopiedField(null), 2000);
     } catch (err) {
-      toast.error("Failed to copy");
+      console.error("Failed to copy text: ", err);
+      toast.error("Clipboard access denied");
     }
   };
   const Smartbiz_Url = "https://smartbiz.amazon.in/";
@@ -94,8 +96,8 @@ export const IncomingOrderCard = ({ order }: { order: OrderActionEvent }) => {
         </h4>
         {/* Hide description if it is same as order items */}
         <p className={`text-zinc-500 text-sm mt-1 line-clamp-2 ${order.orderDescription === order.orderItems.map(i => i.name).join(", ")
-            ? 'invisible'
-            : 'visible'
+          ? 'invisible'
+          : 'visible'
           }`}>
           {order.orderDescription || " "}
         </p>
@@ -105,39 +107,59 @@ export const IncomingOrderCard = ({ order }: { order: OrderActionEvent }) => {
       {(order.customerName || order.customerPhone || order.customerAddress) && (
         <div className="mb-4 bg-zinc-950/50 rounded-lg p-3 border border-zinc-800/50">
           <div className="flex flex-col gap-1.5">
+
+            {/* NAME  */}
             {order.customerName && (
-              <p className="text-sm text-zinc-200 font-medium flex items-center gap-2">
-                <span className="text-zinc-500">👤</span> {order.customerName}
-              </p>
-            )}
-            {/* Use clean Phone number and adreess remvoe 91 or rawjson */}
-            {order.customerPhone && (
-              <div className="flex items-center justify-between group">
-                <p className="text-xs text-zinc-400 font-mono flex items-center gap-2">
-                  <span className="text-zinc-500">📞</span> {cleanPhone}
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-zinc-500 shrink-0">👤</span>
+                <p
+                  className="text-sm text-zinc-200 font-medium truncate"
+                  title={order.customerName}
+                >
+                  {order.customerName}
                 </p>
+              </div>
+            )}
+
+            {/* PHONE  */}
+            {order.customerPhone && (
+              <div className="flex items-center justify-between group min-w-0 gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-zinc-500 shrink-0">📞</span>
+                  <p className="text-xs text-zinc-400 font-mono truncate">
+                    {cleanPhone}
+                  </p>
+                </div>
                 <button
                   onClick={() => handleCopy(cleanPhone, "Phone")}
-                  className="text-zinc-500 hover:text-emerald-400 transition-colors p-1"
+                  className="text-zinc-500 hover:text-emerald-400 transition-colors p-1 shrink-0"
                 >
                   {copiedField === "Phone" ? <Check size={14} /> : <Copy size={14} />}
                 </button>
               </div>
             )}
+
+            {/* ADDRESS */}
             {order.customerAddress && (
-              <div className="flex items-start justify-between group gap-2">
-                <p className="text-xs text-zinc-500 line-clamp-2 flex items-start gap-2">
-                  <span className="text-zinc-500">📍</span>
-                  <span className="mt-0.5">{cleanAddress}</span>
-                </p>
+              <div className="flex items-start justify-between group gap-2 min-w-0">
+                <div className="flex items-start gap-2 min-w-0 flex-1">
+                  <span className="text-zinc-500 shrink-0 mt-0.5">📍</span>
+                  <p
+                    className="text-xs text-zinc-500 line-clamp-2 break-all mt-0.5"
+                    title={cleanAddress}
+                  >
+                    {cleanAddress}
+                  </p>
+                </div>
                 <button
                   onClick={() => handleCopy(cleanAddress, "Address")}
-                  className="text-zinc-500 hover:text-emerald-400 transition-colors p-1 shrink-0"
+                  className="text-zinc-500 hover:text-emerald-400 transition-colors p-1 shrink-0 mt-0.5"
                 >
                   {copiedField === "Address" ? <Check size={14} /> : <Copy size={14} />}
                 </button>
               </div>
             )}
+
           </div>
         </div>
       )}
