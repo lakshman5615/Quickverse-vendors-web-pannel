@@ -13,9 +13,10 @@ const STATUS_STYLES: Record<string, string> = {
 // ─── Props ──────────────────────────────────────────────────────
 interface OrderTableProps {
   orders: OrderApiResponse[];
-  currentPage: number;
+  currentPage: number; // 0-indexed
   pageSize: number;
-  totalOrders: number;
+  totalPages: number;
+  totalElements: number;
   onPageChange: (page: number) => void;
   onOrderClick: (order: OrderApiResponse) => void;
 }
@@ -48,11 +49,11 @@ const OrderTable = ({
   orders,
   currentPage,
   pageSize,
-  totalOrders,
+  totalPages,
+  totalElements,
   onPageChange,
   onOrderClick,
 }: OrderTableProps) => {
-  const totalPages = Math.ceil(totalOrders / pageSize);
 
   // ─── Empty state ──────────────────────────────────────────────
   if (orders.length === 0) {
@@ -134,26 +135,26 @@ const OrderTable = ({
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4 px-1">
           <p className="text-xs text-zinc-500">
-            Showing {(currentPage - 1) * pageSize + 1}–
-            {Math.min(currentPage * pageSize, totalOrders)} of {totalOrders} orders
+            Showing {currentPage * pageSize + 1}–
+            {Math.min((currentPage + 1) * pageSize, totalElements)} of {totalElements} orders
           </p>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
+              disabled={currentPage === 0}
               className="p-1.5 rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
               <ChevronLeft size={16} />
             </button>
 
             <span className="text-xs text-zinc-400 min-w-[80px] text-center">
-              Page {currentPage} of {totalPages}
+              Page {currentPage + 1} of {totalPages}
             </span>
 
             <button
               onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages - 1}
               className="p-1.5 rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
               <ChevronRight size={16} />
